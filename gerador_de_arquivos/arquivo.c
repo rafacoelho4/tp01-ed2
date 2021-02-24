@@ -137,11 +137,10 @@ void criarArquivoAleatorio () {
     srand(time(NULL)); // Initialization, should only be called once.
 
     for(i = 1; i <= TAMANHO; i++) {
-        item.chave = i;
         item.dado1 = i * 20;
 
        
-        item.chave = rand()%TAMANHO; // Returns a pseudo-random integer between 0 and RAND_MAX.
+          // Returns a pseudo-random integer between 0 and RAND_MAX.
          printf("%i\n",item.chave);
         char str[501] = { [500] = '\1' }; // make the last character non-zero so we can test based on it later
         rand_str(str, sizeof str - 1);
