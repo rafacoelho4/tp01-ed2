@@ -4,6 +4,8 @@
 
 #include "arquivo.h"
 
+#define TAMANHO 100
+
 void rand_str(char *dest, size_t length) {
     char charset[] = "0123456789"
                      "abcdefghijklmnopqrstuvwxyz"
@@ -27,7 +29,7 @@ void criarArquivoCrescente () {
         printf("Erro ao criar arquivo");
     }
 
-    for(i = 1; i <= 100; i++) {
+    for(i = 1; i <= TAMANHO; i++) {
         item.chave = i;
         item.dado1 = i * 20;
         
@@ -77,7 +79,7 @@ void criarArquivoDecrescente () {
     }
 
     int j = 0;
-    for(int i = 100; i > 0; i--) {
+    for(int i = TAMANHO; i > 0; i--) {
         item.chave = i;
         item.dado1 = i * 20;
         
@@ -90,8 +92,8 @@ void criarArquivoDecrescente () {
         strcat(str, cod);
         strcpy(item.dado2, str);
 
-        // if (i < 100;&& i > 999990) printf("\n\n%d : %s\n\t\n\n%s\n\n %s", i, cod, str, item.dado2);
-        // if (i < 100 && i > 80) printf("\n\n%d : %s\n\t\n%s\n\n %s", i, cod, str, item.dado2);
+        // if (i < TAMANHO;&& i > 999990) printf("\n\n%d : %s\n\t\n\n%s\n\n %s", i, cod, str, item.dado2);
+        // if (i < TAMANHO && i > 80) printf("\n\n%d : %s\n\t\n%s\n\n %s", i, cod, str, item.dado2);
         
         
         fwrite(&item, sizeof(Item), 1, arq);
@@ -134,12 +136,12 @@ void criarArquivoAleatorio () {
 
     srand(time(NULL)); // Initialization, should only be called once.
 
-    for(i = 1; i <= 100; i++) {
+    for(i = 1; i <= TAMANHO; i++) {
         item.chave = i;
         item.dado1 = i * 20;
 
        
-        item.chave = rand()%100; // Returns a pseudo-random integer between 0 and RAND_MAX.
+        item.chave = rand()%TAMANHO; // Returns a pseudo-random integer between 0 and RAND_MAX.
          printf("%i\n",item.chave);
         char str[501] = { [500] = '\1' }; // make the last character non-zero so we can test based on it later
         rand_str(str, sizeof str - 1);
