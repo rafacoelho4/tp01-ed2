@@ -13,13 +13,11 @@ typedef struct{
     int data[100];
 }Register;
 
-
 struct Node{
     int n;
     Register r[(M*M)];
     Pointer* p[(M*M)+1];
 };
-
 
 
 void print(Pointer* tree);
