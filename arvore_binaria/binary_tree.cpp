@@ -1,54 +1,48 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
+#include "binary_tree.hpp"
 
-using namespace std;
-
-typedef struct{
-    int key;
-    long int data1;
-    char data2[501];
-}Register;
-
-typedef struct{
-    Register reg;
-    int right;
-    int left;
-}Node;
-
-Node create_node(Node a);
-void insert(FILE* output_file,FILE* input_file);
-int insert_right_node(Node node, Node aux, int count, int* position, FILE** file);
-int insert_left_node( Node node, Node aux, int count, int* position, FILE** file);
-int open_binary_file(FILE** file);
-int search_node(int key, FILE** file);
-
-int main(){
-
+void binary_tree( int key, const char* name ){
+    
+    long long comp=0, transf=0;
     FILE* output_file;
-    FILE* input_file = fopen("aleatorio.bin","rb");
+    FILE* input_file;
     //caso o arquivo abra com sucesso, executa:
-     if(open_binary_file( &output_file )){
-        insert(output_file,input_file);
+     if(open_binary_file( &output_file,"arvore.bin","w+b")&& open_binary_file( &input_file,name,"r+b")){
+      
+        cout<<"\n\n\n\noi"<<name;
+        insert(output_file, input_file, &transf, &comp);
+        comp=0; transf=0;
         //Volta para o início do arquivo
         rewind(output_file);
         //realiza a pesquisa do item 18
-        if(search_node( 91, &output_file )){
+        search( key, output_file);      
+    }                    
+}
+
+void search(int key, FILE* output_file){
+     long long transf=0;  
+     long long comp=0;
+    clock_t start = clock();
+        if(search_node( key, &output_file, &transf, &comp)){
             cout<<"item encontrado"<<endl;
         }
         else{
             cout<<"item não encontrado"<<endl;
         }
-    } 
-                     
-    return 0;
+         clock_t end = clock();
+        cout<<"Tempo busca:\n";
+        cout<<"Quantidade de comparações: "<<comp<<endl;
+        cout<<"Quantidade de transferencias: "<<(transf)<<endl;
+        double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        cout<<"Tempo total: "<<cpu_time_used<<endl;     
 }
 
-void insert(FILE* output_file, FILE* input_file){
+void insert(FILE* output_file, FILE* input_file,  long long*transf ,  long long*comp){
+    clock_t start = clock();
     Node a, aux;
     int i = -1;
 
     
+    (*transf)++;
     while(fread(&a.reg,sizeof(Register),1,input_file)== 1){
         i++;
 
@@ -66,23 +60,39 @@ void insert(FILE* output_file, FILE* input_file){
             {   //Caminha no arquivo de acordo com a posição selecionada
                 fseek( output_file, position*sizeof(Node), SEEK_SET);
                 //Caso seja possivel ler um item, ele é lido
+                (*transf)++;
                 if(fread( &aux, sizeof(Node), 1, output_file ) == 1){
                     //Caso a chave seja maior do que do item lido, é feita a tentativa de inserir à direita
+                    
                     if(a.reg.key > aux.reg.key){
-                        inserted = insert_right_node( a, aux, i, &position, &output_file );
+                        (*comp)++;
+                        inserted = insert_right_node( a, aux, i, &position, &output_file);
+                        (*comp)++;
                     }
                     //Caso a chave seja menor do que do item lido, é feita a tentativa de inserir à esquerda
                     else if(a.reg.key < aux.reg.key){
+                        (*comp)+=2;
                         inserted = insert_left_node( a, aux, i, &position, &output_file );
+                        (*comp)++;
                     }
-                    //Caso o item seja igual, é feita a finalização do laço
+                        //Caso o item seja igual, é feita a finalização do laço
                     else{
+                        (*comp)+=3;
                         inserted = 1;
                     }
+                    
+                    
                 } 
             } 
-        }    
-    }         
+        }
+        (*transf)++;    
+    } 
+    clock_t end = clock();
+    cout<<"Tempo inserção:\n";
+    cout<<"Quantidade de comparações: "<<(*comp)<<endl;
+    cout<<"Quantidade de transferencias: "<<(*transf)<<endl;
+    double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    cout<<"Tempo total: "<<cpu_time_used<<endl;        
 }
 
 Node create_node(Node a ){
@@ -91,13 +101,11 @@ Node create_node(Node a ){
     return a;
 }
 
-int open_binary_file( FILE** file ){
- if ((*file = fopen("arvore.bin", "w+b")) == NULL)
-    {
-        cout << "Erro na abertura do file\n";
+int open_binary_file(FILE **file, const char* name, const char* type){
+    if((*file = fopen(name,type)) == NULL){
         return 0;
     }
- return 1;
+    return 1;
 }
 
 int insert_right_node( Node node, Node aux, int count, int* position, FILE** file ){
@@ -105,7 +113,7 @@ int insert_right_node( Node node, Node aux, int count, int* position, FILE** fil
         aux.left = count;
         fseek( *file, (*position * sizeof(Node)), SEEK_SET);
         fwrite( &aux, sizeof(Node), 1, *file);
-         fseek( *file, (count* sizeof(Node)), SEEK_SET);
+        fseek( *file, (count* sizeof(Node)), SEEK_SET);
         fwrite( &node, sizeof(Node), 1, *file);
         return 1;
     }
@@ -126,24 +134,33 @@ int insert_left_node( Node node, Node aux, int count, int* position, FILE** file
     return 0;   
 }
 
-int search_node( int key, FILE** file ){
+ int search_node( int key, FILE** file,  long long*transf ,  long long*comp){
+    
     Node aux;
     int position = 0;
+    (*transf)++;
     while ( fread(&aux, sizeof( Node), 1, *file) == 1 )
     {
         fseek( *file, position*sizeof(Node), SEEK_SET);
+        (*transf)++;
         if(fread( &aux, sizeof(Node), 1, *file ) == 1){
-            
+            (*transf)++;
             if(key > aux.reg.key){
+                (*comp)++;
                 position = aux.left;
             }
             else if(key < aux.reg.key){
+                (*comp)+=2;
                 position = aux.right;
             }
             else{
+                (*comp)+=3;
                 return 1;
             }
         } 
-    }  
+        (*transf)++;
+    }
+      
+
     return 0;
-}
+} 
