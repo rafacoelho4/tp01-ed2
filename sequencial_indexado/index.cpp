@@ -12,6 +12,7 @@ int preprocessamento(tipoindice tabela[], FILE *arq, int quantidade) {
         if(cont > quantidade) break;
         if (cont % ITENSPAGINA == 1) {
             tabela[pos].chave = x.chave;
+            tabela[pos].posicao = pos + 1;
             pos++;
         }
     }
@@ -150,4 +151,37 @@ int pesquisaDecrescente (tipoindice tab[], int tam, Item* item, FILE *arq, int *
         }
         return 0;
     }
+}
+
+// ###################################################
+
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+int teste(FILE *arq) {
+    int pos, qtd; int comparacoes = 0;
+    int resultados[10]; int chaves[10] = {1,2,3,400,500,6,7,8,9000,10}; 
+
+    int i, j = 100, k;
+    for(i = 0; i < 6; i++) {
+        tipoindice tabela[MAXTABELA]; Item x;
+        pos = preprocessamento(tabela, arq, j);
+        for(k = 0; k < 10; k++) {
+            x.chave = chaves[k] + 4*i + k*2;
+            printf("\nChave: %d", x.chave);
+            resultados[k] = pesquisa(tabela, pos, &x, arq, &comparacoes);
+
+            if(resultados[k]) {
+                printf("\nRegistro encontrado!");
+                // printf("Item: %d | %ld, %s \n", x.chave, x.dado1, x.dado2);
+            } else {
+                printf("\nRegistro nao foi encontrado :(");
+            }
+            rewind(arq);
+        }
+        printf(ANSI_COLOR_BLUE "\nCOMPARACOES EM ARQ DE %d REGISTROS       : %d" ANSI_COLOR_RESET, j, comparacoes);
+        j = j * 10;
+    }
+
+    return 0;
 }
