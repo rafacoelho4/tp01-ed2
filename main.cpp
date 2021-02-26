@@ -6,7 +6,7 @@
 #include "./sequencial_indexado/index.cpp"
 #include "./arvore_binaria/binary_tree.cpp"
 #include "./gerador_de_arquivos/arquivo.cpp"
-
+#include "./arvore_b_estrela/b_star.cpp"
 #define ANSI_COLOR_BLUE    "\x1b[34m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
@@ -115,12 +115,40 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (metodo == 3) {
-        //  árvore B
+     if (metodo == 3) {
+        if(situacao == 1 ){
+            criarArquivoCrescente(qtd);
+        }
+        else if(situacao == 2 ){
+            criarArquivoDecrescente(qtd);
+            
+        }
+        else{
+            criarArquivoAleatorio(qtd);
+            
+        }
     }
+    
+    if (metodo == 4) { 
+        cout<<"oi:";
+   
+        if(situacao == 1 ){
+            criarArquivoCrescente(qtd);
+            b_star(chave, "crescente.bin", qtd, false);
+            
+           
+            // TODO: fclose(arq); aqui?
+        }
+        else if(situacao == 2 ){
+            criarArquivoDecrescente(qtd);
+             b_star(chave, "decrescente.bin", qtd, false);
+          
+        }
+        else{
+            criarArquivoAleatorio(qtd);
+             b_star(chave, "aleatorio.bin", qtd, false);
 
-    if (metodo == 4) {
-        //  árvore B*
+        }
     }
 
     return 0;
