@@ -2,13 +2,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <iostream>
 
 #include "./sequencial_indexado/index.cpp"
 #include "./arvore_binaria/binary_tree.cpp"
 #include "./gerador_de_arquivos/arquivo.cpp"
+#include "./arvore_b_estrela/b_star.cpp"
+//#include "./arvore_b/b_tree.cpp"
 
 #define ANSI_COLOR_BLUE    "\x1b[34m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+
+using namespace std;
 
 int main(int argc, char *argv[]) 
 {
@@ -23,6 +28,10 @@ int main(int argc, char *argv[])
     int qtd = atoi(argv[2]);
     int situacao = atoi(argv[3]);
     int chave = atoi(argv[4]);
+
+    char flag[3] = "-P";
+
+    // TODO: COMPARAÇÃO DO -P PARA PODER SABER SE DEVE IMPRIMIR TUDO
 
     // argv deve ser:
     // pesquisa <metodo> <quantidade> <situação> <chave> [-P]
@@ -116,11 +125,34 @@ int main(int argc, char *argv[])
     }
 
     if (metodo == 3) {
-        //  árvore B
+        if(situacao == 1 ){
+            criarArquivoCrescente(qtd);
+        }
+        else if(situacao == 2 ){
+            criarArquivoDecrescente(qtd);
+            
+        }
+        else{
+            criarArquivoAleatorio(qtd);
+            
+        }
     }
-
-    if (metodo == 4) {
-        //  árvore B*
+    
+    if (metodo == 4) { // Árvore B*
+        if(situacao == 1 ){
+            criarArquivoCrescente(qtd);
+            b_star(chave, "crescente.bin", qtd, false);
+           
+            // TODO: fclose(arq); aqui?
+        }
+        else if(situacao == 2 ){
+            criarArquivoDecrescente(qtd);
+            b_star(chave, "decrescente.bin", qtd, false);
+        }
+        else{
+            criarArquivoAleatorio(qtd);
+            b_star(chave, "aleatorio.bin", qtd, false);
+        }
     }
 
     return 0;

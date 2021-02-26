@@ -1,19 +1,29 @@
 main: main.o index.o
-	gcc main.o -o main
+	g++ main.o -o main
 
-main.o: main.c
-	gcc -c main.c
+main.o: main.cpp
+	g++ -c main.cpp
 
 ################ Pesquisa Sequencial Indexada ################
 
-index.o: ./sequencial_indexado/index.c
-	gcc -c ./sequencial_indexado/index.c
+index.o: ./sequencial_indexado/index.cpp
+	g++ -c ./sequencial_indexado/index.cpp
 
 clean:
 	del -f *.o main.exe
 
 remove:
 	rm -f *.o main.exe
+
+################ Árvore B* ################
+b_star.o: ./arvore_b_estrela/b_star.cpp
+	g++ -c ./arvore_b_estrela/b_star.cpp
+
+clean:
+	del -f *.o b_star.exe
+
+remove:
+	rm -f *.o b_star.exe
 
 # Em windows, usar comando make clean
 # Em linux, comando make remove

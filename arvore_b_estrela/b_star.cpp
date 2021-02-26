@@ -1,222 +1,378 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+#include "../tipos.hpp"
+
+using namespace std;
 
 #define M 2
 #define MM 2*M
 #define SIZE 200
 
-// estrutura criada a partir do arquivo binario
-typedef struct{
-	int key;
-	long data1;
-	char data2[1000];
-}Register;
-
 typedef enum {
-    INTERNAL,
-    EXTERNAL
+    INTERNA,
+    EXTERNA
 } Status;
 
-typedef struct Node* Pointer;
+typedef struct Nodo* Apontador;
 
-typedef struct Node {
+typedef struct Nodo {
     Status st;
 
     union {
         struct {
             int n_int;
-            int key_int[MM];
-            Pointer p_int[MM + 1];
+            int chave_int[MM];
+            Apontador p_int[MM + 1];
         } UI;
 
         struct {
             int n_ext;
-            Register reg_ext[MM];
+            Item item_ext[MM];
         } UE;
     } UU;
-} Node;
+} Nodo;
 
-void insert(Register* reg, Pointer* pointer){
+int abre_arquivo_bin(FILE **file, const char* name, const char* type);
+void b_star(int chave, const char* arq, int size, bool P);
+void imprimir(Apontador* ap, int chave, long int* transfer, long int* compare);
+Item** ler_arquivo(FILE** file, int size, long int* transfer, long int* compare);
+void inserir(Item* item, Apontador* ap, long int* transfer, long int* compare);
+void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* grew, long i, long int* transfer, long int* compare);
+void ins_bstar(Item item, Apontador ap, short* grew, Item* rr, Apontador*pr, long int* transfer, long int* compare);
+void inserir_no_nodo_star(Apontador ap, Item item, Apontador right, long int* transfer, long int* compare);
+void pesquisa_bstar(Item* item, Apontador *p, long int* transfer, long int* compare);
+
+int abre_arquivo_bin(FILE **file, const char* name, const char* type){
+    if((*file = fopen(name,type)) == NULL){
+        return 0;
+    }
+    return 1;
+}
+
+void b_star(int chave, const char* arq, int size, bool P){
+	clock_t g1 = clock();
+	long int comp = 0, transf = 0;
+    FILE* input_file;
+	Apontador* arvore = NULL;
+
+    if(abre_arquivo_bin(&input_file, arq, "r+b")){
+        cout << "\n\n\n\noi" << arq;
+
+		// Cria um vetor com os itens do arquivo binário
+		Item** itens = ler_arquivo(&input_file, size, &transf, &comp);
+		Item* item = (Item*) calloc(1, sizeof(Item));
+		item->chave = chave;
+
+		// Insere os itens do arquivo binário na árvore
+		for (int i = 0; i < size; i++) {
+			inserir(itens[i], arvore, &transf, &comp);
+		}
+
+		comp = 0; transf = 0;
+
+		g1 = (clock() - g1)/(CLOCKS_PER_SEC/1000);
+		printf("Insercao Arvore B*\n\t- Tempo: %15lld ms\n\t- Comparacoes: %12ldx\n\t- Tranferencias: %9ldx\n\n",
+		(long long unsigned int)g1, comp, transf);
+
+		clock_t g2 = clock();
+		comp = 0; // ERROR: *comp = 0 ?? n da certo assim
+
+		pesquisa_bstar(item, arvore, &transf, &comp);
+
+		g2 = (clock() - g2)/(CLOCKS_PER_SEC/1000);
+		printf("Pesquisa Arvore B\n\t- Tempo: %15lld ms\n\t- Comparacoes: %12ldx\n\t- Tranferencias: %9ldx\n\n",
+		(long long unsigned int)g2, comp, transf);
+
+		if(P){ // imprime a árvore
+		//printBStarTree(tree, key, transference, compare);
+		}
+
+		for (size_t i = 0; i < size; i++){
+        	free(itens[i]);
+    	}
+    	free(item);
+    }
+}
+
+void imprimir(Apontador* ap, int chave, long int* transfer, long int* compare){
+	if(ap == NULL){
+		return;
+	}
+
+	int i = 0;
+	Apontador aux;
+
+	if ((*ap)->st == INTERNA) {
+		while (i <= (*ap)->UU.UI.n_int){
+			imprimir(&((*ap)->UU.UI.p_int[i]), chave, transfer, compare);
+			if (i != (*ap)->UU.UI.n_int)
+				printf("Interno: (%d) %d\n", i, (*ap)->UU.UI.chave_int[i]);
+			i++;
+		}
+	}
+	else{
+		printf("Externo: ");
+		aux = (*ap);
+		for (int j = 0; j < (*ap)->UU.UE.n_ext; j++) {
+			printf("(%d) %d ", j, aux->UU.UE.item_ext[j].chave);
+		}
+		printf("\n");
+	}
+
+}
+
+Item** ler_arquivo(FILE** file, int size, long int* transfer, long int* compare){
+	Item aux;
+	Item** item = (Item**) calloc(size, sizeof(Item));
+	for (int i = 0; i < size; i++) {
+		item[i] = (Item*) calloc(1,sizeof(Item));
+	}
+
+	// le registro por registro e insere na variavel auxiliar criada
+	int i = 0;
+	while (fread(&aux, sizeof(Item), 1, *file) && size > i){
+		*transfer += 1;
+		Item* aux1 = (Item*) calloc(1, sizeof(Item));
+		aux1->chave = aux.chave;
+		aux1->dado1 = aux.dado1;
+		strcpy(aux1->dado2, aux.dado2);
+		item[i] = aux1;
+		i++;
+	}
+
+	return item;
+}
+
+// Transfer e compare são contadores p/ o nº de transferências e comparações
+void inserir(Item* item, Apontador* ap, long int* transfer, long int* compare){
 	short grew;
 
-	Register rr, temp = *reg;
-	Node *pr, *p_temp;
-	/*
-		inicializa a arvore b estrela caso ela seja vazia e inicializa a arvore b caso seja necessario
-	*/
-	if (*pointer == NULL){
-		p_temp = (Node*) calloc(1, sizeof(Node));
-		p_temp->st = EXTERNAL;
+	Item rr, temp = *item;
+	Nodo *pr, *p_temp;
+
+	if (*ap == NULL){ // Inicializa a Árvore B* caso necessário
+		p_temp = (Nodo*) calloc(1, sizeof(Nodo));
+		p_temp->st = EXTERNA;
 		p_temp->UU.UE.n_ext = 1;
-		p_temp->UU.UE.reg_ext[0] = temp;
-		*pointer = p_temp;
+		p_temp->UU.UE.item_ext[0] = temp;
+		*ap = p_temp;
 		return;
 	}
 	else{
-		insBStar(temp, *pointer, &grew, &rr, &pr);
+		ins_bstar(temp, *ap, &grew, &rr, &pr, transfer, compare);
 		if (grew == 1){
-			p_temp = (Node*) calloc(1, sizeof(Node));
-			p_temp->st = INTERNAL;
+			p_temp = (Nodo*) calloc(1, sizeof(Nodo));
+			p_temp->st = INTERNA;
 			p_temp->UU.UI.n_int = 1;
-			p_temp->UU.UI.key_int[0] = rr.key;
+			p_temp->UU.UI.chave_int[0] = rr.chave;
 			p_temp->UU.UI.p_int[1] = pr;
-			p_temp->UU.UI.p_int[0] = *pointer;
-			*pointer = p_temp;
+			p_temp->UU.UI.p_int[0] = *ap;
+			*ap = p_temp;
 		}
 	}
 }
 
-// funcao que insere uma nova chave na parte externa da arvore
-void insBStar(Register reg, Pointer pointer, short* grew, Register* rr, Pointer*pr ){
+// Função que insere uma nova chave na página externa da árvore
+void ins_bstar(Item item, Apontador ap, short* grew, Item* rr, Apontador*pr, long int* transfer, long int* compare){
 	int i = 1;
 
-	if (pointer->st == EXTERNAL) {
-		
-		if (pointer->UU.UE.n_ext < MM){
-			*rr = reg;
-			insertOnNodeStar(pointer, *rr, *pr);
+	if (ap->st == EXTERNA) {
+		*compare += 1;
+		if (ap->UU.UE.n_ext < MM){
+			*rr = item;
+			inserir_no_nodo_star(ap, *rr, *pr, transfer, compare);
 			*grew = 0;
 			return;
 		}
 		else{
-			*rr = reg;
+			*rr = item;
 			*pr = NULL;
-
-			
-			while (i < pointer->UU.UE.n_ext && reg.key > pointer->UU.UE.reg_ext[i-1].key){
+		
+			*compare += 1;
+			while (i < ap->UU.UE.n_ext && item.chave > ap->UU.UE.item_ext[i-1].chave){
 				i++;
-				
+				*compare += 1;	
 			}
-			if(reg.key < pointer->UU.UE.reg_ext[i-1].key) i--;
 
-			Pointer temp = (Pointer) calloc(1,sizeof(Node));
+			*compare += 1;
 
-			temp->st = EXTERNAL;
+			if(item.chave < ap->UU.UE.item_ext[i-1].chave) i--;
+
+			Apontador temp = (Apontador) calloc(1,sizeof(Nodo));
+
+			temp->st = EXTERNA;
 			temp->UU.UE.n_ext = 0;
 
 			if (i < (M+1)){
-				insertOnNodeStar(temp, pointer->UU.UE.reg_ext[MM-1], *pr);
-				pointer->UU.UE.n_ext--;
-				insertOnNodeStar(pointer, *rr, *pr);
+				inserir_no_nodo_star(temp, ap->UU.UE.item_ext[MM-1], *pr, transfer, compare);
+				ap->UU.UE.n_ext--;
+				inserir_no_nodo_star(ap, *rr, *pr, transfer, compare);
 			}
 			else{
-				insertOnNodeStar(temp, *rr, *pr);
+				inserir_no_nodo_star(temp, *rr, *pr, transfer, compare);
 			}
 
 			for (int j = 1; j <= M; j++){
-				insertOnNodeStar(temp, pointer->UU.UE.reg_ext[MM - j], *pr);
+				inserir_no_nodo_star(temp, ap->UU.UE.item_ext[MM - j], *pr, transfer, compare);
 			}
 
-			pointer->UU.UE.n_ext = M;
-			*rr = pointer->UU.UE.reg_ext[M];
+			ap->UU.UE.n_ext = M;
+			*rr = ap->UU.UE.item_ext[M];
 			*pr = temp;
 			*grew = 1;
 			return;
 		}
 	}
-	insertBStar(pointer, pr, rr, reg, grew, i);
+	inserir_bstar(ap, pr, rr, item, grew, i, transfer, compare);
 }
 
-// funcao que insere seleciona a ramificacao adequada para insercao
-void insertBStar(Pointer pointer, Pointer* pr, Register* rr, Register reg, short* grew, long i ){
-	
-
-	while (i < pointer->UU.UI.n_int && reg.key > pointer->UU.UI.key_int[i-1]){
-		
+// Função que insere seleciona a ramificacão adequada p/ inserção
+void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* grew, long i, long int* transfer, long int* compare){
+	*compare += 1;
+	while (i < ap->UU.UI.n_int && item.chave > ap->UU.UI.chave_int[i-1]){
+		*compare += 1;
 		i++;
 	}
 
-	
-	if(reg.key < pointer->UU.UI.key_int[i-1]) i--;
+	*compare += 1;
+	if(item.chave < ap->UU.UI.chave_int[i-1]) i--;
 
-	insBStar(reg, pointer->UU.UI.p_int[i], grew, rr, pr );
+	ins_bstar(item, ap->UU.UI.p_int[i], grew, rr, pr, transfer, compare);
 	if(*grew == 0) return;
 
-	if (pointer->UU.UI.n_int < MM){
-		insertOnNodeStar(pointer, *rr, *pr );
+	if (ap->UU.UI.n_int < MM){
+		inserir_no_nodo_star(ap, *rr, *pr, transfer, compare);
 		*grew = 0;
 		return;
 	}
 
 	
-	if (reg.key == pointer->UU.UI.key_int[i-1]) {
+	if (item.chave == ap->UU.UI.chave_int[i-1]) {
 		*grew = 0;
 		return;
 	}
 
-	Pointer temp = (Pointer)calloc(1,sizeof(Node));
+	Apontador temp = (Apontador)calloc(1,sizeof(Nodo));
 
-	temp->st = INTERNAL;
+	temp->st = INTERNA;
 	temp->UU.UI.n_int = 0;
 	temp->UU.UI.p_int[0] = NULL;
 
-	Register regTemp;
+	Item itemTemp;
 
 	if (i < (M + 1)){
-		regTemp.key = pointer->UU.UI.key_int[MM - 1];
-		insertOnNodeStar(temp, regTemp, pointer->UU.UI.p_int[MM]);
-		pointer->UU.UI.n_int--;
-		insertOnNodeStar(pointer, *rr, *pr);
+		itemTemp.chave = ap->UU.UI.chave_int[MM - 1];
+		inserir_no_nodo_star(temp, itemTemp, ap->UU.UI.p_int[MM], transfer, compare);
+		ap->UU.UI.n_int--;
+		inserir_no_nodo_star(ap, *rr, *pr, transfer, compare);
 	}
 	else{
-		insertOnNodeStar(temp, *rr, *pr);
+		inserir_no_nodo_star(temp, *rr, *pr, transfer, compare);
 	}
 
 	for (int j = M + 2; j <= MM; j++){
-		regTemp.key = pointer->UU.UI.key_int[j-1];
-		insertOnNodeStar(temp, regTemp, pointer->UU.UI.p_int[j]);
+		itemTemp.chave = ap->UU.UI.chave_int[j-1];
+		inserir_no_nodo_star(temp, itemTemp, ap->UU.UI.p_int[j], transfer, compare);
 	}
 
-	pointer->UU.UI.n_int = M;
-	temp->UU.UI.p_int[0] = pointer->UU.UI.p_int[M+1];
-	rr->key = pointer->UU.UI.key_int[M];
+	ap->UU.UI.n_int = M;
+	temp->UU.UI.p_int[0] = ap->UU.UI.p_int[M+1];
+	rr->chave = ap->UU.UI.chave_int[M];
 	*pr = temp;
 	return;
 }
 
-// funcao que insere na pagina o registro
-void insertOnNodeStar(Pointer pointer, Register reg, Pointer right ){
+// Função que insere na página o item
+void inserir_no_nodo_star(Apontador ap, Item item, Apontador right, long int* transfer, long int* compare){
 	short position;
 	int k;
 
-	if (pointer->st == EXTERNAL){
-		k = pointer->UU.UE.n_ext;
+	if (ap->st == EXTERNA){
+		k = ap->UU.UE.n_ext;
 		position = (k > 0);
 
-		
+		*compare += 1;
 		while (position > 0){
-		
-			if (reg.key >= pointer->UU.UE.reg_ext[k-1].key){
+			*compare += 1;
+			if (item.chave >= ap->UU.UE.item_ext[k-1].chave){
 				position = 0;
 				break;
 			}
-			pointer->UU.UE.reg_ext[k] = pointer->UU.UE.reg_ext[k-1];
+			ap->UU.UE.item_ext[k] = ap->UU.UE.item_ext[k-1];
 			k--;
 
 			if(k < 1) position = 0;
 		}
 
-		pointer->UU.UE.reg_ext[k] = reg;
-		pointer->UU.UE.n_ext++;
+		ap->UU.UE.item_ext[k] = item;
+		ap->UU.UE.n_ext++;
 	}
 	else{
-		k = pointer->UU.UI.n_int;
+		k = ap->UU.UI.n_int;
 		position = (k > 0);
 
 		while (position > 0){
-			if (reg.key >= pointer->UU.UI.key_int[k-1]){
+			if (item.chave >= ap->UU.UI.chave_int[k-1]){
 				position = 0;
 				break;
 			}
-			pointer->UU.UI.key_int[k] = pointer->UU.UI.key_int[k-1];
-			pointer->UU.UI.p_int[k+1] = pointer->UU.UI.p_int[k];
+			ap->UU.UI.chave_int[k] = ap->UU.UI.chave_int[k-1];
+			ap->UU.UI.p_int[k+1] = ap->UU.UI.p_int[k];
 			k--;
 			if(k < 1) position = 0;
 		}
-		pointer->UU.UI.key_int[k] = reg.key;
-		pointer->UU.UI.p_int[k+1] = right;
-		pointer->UU.UI.n_int++;
+		ap->UU.UI.chave_int[k] = item.chave;
+		ap->UU.UI.p_int[k+1] = right;
+		ap->UU.UI.n_int++;
 		return;
+	}
+}
+
+// Função que faz a pesquisa dentro da árvore
+void pesquisa_bstar(Item* item, Apontador *p, long int* transfer, long int* compare){
+    int i;
+
+    Apontador pag = *p;
+
+	// Pesquisa na página interna
+    if ((*p)->st == INTERNA){
+        i = 1;
+
+		// Pesquisa o intervalo no qual o registro pode estar
+		*compare += 2;
+        while (i < pag->UU.UI.n_int && item->chave > pag->UU.UI.chave_int[i - 1]){
+			*compare += 2;
+			i++;
+		}
+
+		// Seleciona o lado da árvore (direita ou esquerda) onde se deve pesquisar até achar uma pág. externa
+        if (item->chave < pag->UU.UI.chave_int[i - 1]){
+			pesquisa_bstar(item, &pag->UU.UI.p_int[i - 1], transfer, compare);
+		}
+        else{
+			pesquisa_bstar(item, &pag->UU.UI.p_int[i], transfer, compare);
+		}
+
+        return;
+    }
+
+    i = 1;
+
+	*compare += 1;
+    while (i < pag->UU.UE.n_ext && item->chave > pag->UU.UE.item_ext[i - 1].chave){
+		*compare += 1;
+		i++;
+	}
+
+	*compare += 1;
+
+    if (item->chave == pag->UU.UE.item_ext[i - 1].chave){
+		*item = pag->UU.UE.item_ext[i - 1];
+		printf("Registro encontrado!\n");
+	}
+    else{
+		printf("Registro não encontrado!\n");
 	}
 }
