@@ -8,7 +8,7 @@
 void sequencial_indexado(int situacao, int chave, int qtd, int parametro) {
     FILE *arq;
     tipoindice tabela[MAXTABELA];
-    int comparacoes = 0, tranferencias = 0; double tempo1, tempo2;
+    int comparacoes = 0, transferencias = 0; double tempo1, tempo2;
 
     int pos; int resultado;
     Item x; x.chave = chave;
@@ -18,15 +18,15 @@ void sequencial_indexado(int situacao, int chave, int qtd, int parametro) {
             printf("Erro ao abrir arquivo"); 
             return;
         }
-        pos = preprocessamento(tabela, arq, qtd, &tempo1);
-        resultado = pesquisa(tabela, pos, &x, arq, &comparacoes, &tempo2);
+        pos = preprocessamento(tabela, arq, qtd, &transferencias, &tempo1);
+        resultado = pesquisa(tabela, pos, &x, arq, &comparacoes, &transferencias, &tempo2);
     } else if(situacao == 2) {
         if ((arq = fopen("decrescente.bin","rb")) == NULL) {
             printf("Erro ao abrir arquivo"); 
             return;
         }
-        pos = preprocessamentoDecrescente(tabela, arq, qtd, &tempo1);
-        resultado = pesquisaDecrescente(tabela, pos, &x, arq, &comparacoes, &tempo2);
+        pos = preprocessamentoDecrescente(tabela, arq, qtd, &transferencias, &tempo1);
+        resultado = pesquisaDecrescente(tabela, pos, &x, arq, &comparacoes, &transferencias, &tempo2);
     }
 
     if(resultado) {
@@ -37,6 +37,7 @@ void sequencial_indexado(int situacao, int chave, int qtd, int parametro) {
     }        
 
     printf(ANSI_COLOR_BLUE "\nCOMPARACOES             : %d" ANSI_COLOR_RESET, comparacoes);
+    printf(ANSI_COLOR_BLUE "\nTRANSFERENCIAS          : %d" ANSI_COLOR_RESET, transferencias);
     printf(ANSI_COLOR_BLUE "\nTEMPO PREPROCESSAMENTO  : %lf segundos" ANSI_COLOR_RESET, tempo1);
     printf(ANSI_COLOR_BLUE "\nTEMPO EXECUCAO PESQUISA : %lf segundos" ANSI_COLOR_RESET, tempo2);
 
@@ -45,40 +46,40 @@ void sequencial_indexado(int situacao, int chave, int qtd, int parametro) {
 
 // Gerando a tabela de índice das páginas
 // Retorna pos = tamanho da tabela de indice de paginas
-int preprocessamento(tipoindice tabela[], FILE *arq, int quantidade, double *tempo) {
-    Item x;
+int preprocessamento(tipoindice tabela[], FILE *arq, int quantidade, int *transferencias, double *tempo) {
+    Item pag[4];
     int pos = 0, cont = 0;
 
     clock_t start, end;
     double cpu_time_used;
     start = clock();
 
-    while ((fread(&x, sizeof(x), 1, arq)) == 1) {
+    while((fread(pag, 4 * sizeof(Item), 1, arq)) == 1) {
         cont++;
         if(cont > quantidade) break;
-        if (cont % ITENSPAGINA == 1) {
-            tabela[pos].chave = x.chave;
-            tabela[pos].posicao = pos + 1;
-            pos++;
-        }
+        tabela[pos].chave = pag[0].chave;
+        tabela[pos].posicao = pos + 1;
+        pos++;
     }
+
+    *transferencias = cont;
 
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     *tempo = cpu_time_used;
     
     // Imprimindo tabela de índices
-    // int i;
-    // for(i = 0; i < quantidade / ITENSPAGINA; i++) {
-    //     printf("\n%2d | %2d | %-8d", i, tabela[i].posicao, tabela[i].chave);
-    // }
+    int i;
+    for(i = 0; i < quantidade / ITENSPAGINA; i++) {
+        printf("\n%2d | %2d | %-8d", i, tabela[i].posicao, tabela[i].chave);
+    }
 
     fflush (stdout);
     return pos;
 }
 
 // Efetuando a pesquisa sequencial indexada
-int pesquisa (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes, double *tempo) {
+int pesquisa (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes, int *transferencias, double *tempo) {
     Item pagina[ITENSPAGINA];
     int i, quantitens;
     long desloc;
@@ -112,6 +113,8 @@ int pesquisa (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes
 
         fseek (arq, desloc, SEEK_SET);
         fread (&pagina, sizeof(Item), quantitens, arq);
+
+        *transferencias = *transferencias + 1;
         
         // Pesquisa sequencial na página lida
         for (i=0; i < quantitens; i++) {
@@ -133,8 +136,8 @@ int pesquisa (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes
 }
 
 // Tabela ordenada decrescentemente
-int preprocessamentoDecrescente(tipoindice tabela[], FILE *arq, int quantidade, double *tempo) {
-    Item x;
+int preprocessamentoDecrescente(tipoindice tabela[], FILE *arq, int quantidade, int *transferencias, double *tempo) {
+    Item pag[4];
     int pos = 0, cont = 0;
 
     clock_t start, end;
@@ -144,15 +147,17 @@ int preprocessamentoDecrescente(tipoindice tabela[], FILE *arq, int quantidade, 
     // NAS ULTIMAS 200 POSICOES
     // fseek(arq, - (200 * sizeof x), SEEK_END);
 
-    while ((fread(&x, sizeof(x), 1, arq)) == 1) {
+    while ((fread(pag, 4 * sizeof(Item), 1, arq)) == 1) {
         cont++;
         if(cont > quantidade) break;
         if (cont % ITENSPAGINA == 1) {
-            tabela[pos].chave = x.chave;
+            tabela[pos].chave = pag[0].chave;
             tabela[pos].posicao = pos + 1;
             pos++;
         }
     }
+
+    *transferencias = cont;
 
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
@@ -169,7 +174,7 @@ int preprocessamentoDecrescente(tipoindice tabela[], FILE *arq, int quantidade, 
 }
 
 // Pesquisa de maior para menor
-int pesquisaDecrescente (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes, double *tempo) {
+int pesquisaDecrescente (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes, int *transferencias, double *tempo) {
     Item pagina[ITENSPAGINA];
     int i = 0, quantitens;
     long desloc;
@@ -208,8 +213,8 @@ int pesquisaDecrescente (tipoindice tab[], int tam, Item* item, FILE *arq, int *
         // comecando nas ultimas 200 posicoes
         // fseek(arq, - (200 * sizeof(Item)), SEEK_END);
         fseek (arq, desloc, SEEK_SET);
-        
         fread (&pagina, sizeof(Item), quantitens, arq);
+        *transferencias = *transferencias + 1;
         
         // Pesquisa sequencial na página lida
         for (i = 0; i < quantitens; i++) {
@@ -239,11 +244,11 @@ int teste(FILE *arq) {
     int i, j = 100, k;
     for(i = 0; i < 6; i++) {
         tipoindice tabela[MAXTABELA]; Item x;
-        pos = preprocessamento(tabela, arq, j, &tempo);
+        pos = preprocessamento(tabela, arq, j, &transferencias, &tempo);
         for(k = 0; k < 10; k++) {
             x.chave = chaves[k] + 4*i + k*2;
             printf("\nChave: %d", x.chave);
-            resultados[k] = pesquisa(tabela, pos, &x, arq, &comparacoes, &tempo);
+            resultados[k] = pesquisa(tabela, pos, &x, arq, &comparacoes, &transferencias, &tempo);
 
             if(resultados[k]) {
                 printf("\nRegistro encontrado!");
