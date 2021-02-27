@@ -1,6 +1,57 @@
 #include <stdio.h>
 #include "index.hpp"
 
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+void sequencial_indexado(int situacao, int chave, int qtd, int parametro) {
+    FILE *arq;
+    tipoindice tabela[MAXTABELA];
+    int comparacoes = 0, tranferencias = 0;
+
+    clock_t start, end;
+    double cpu_time_used;
+
+    int pos; int resultado;
+    Item x; x.chave = chave;
+
+    if(situacao == 1) {
+        start = clock();
+
+        // Retorna pos = tamanho da tabela de indice de paginas
+        pos = preprocessamento(tabela, arq, qtd);
+
+        resultado = pesquisa(tabela, pos, &x, arq, &comparacoes);
+
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    } else if(situacao == 2) {
+
+        start = clock();
+
+        // Retorna pos = tamanho da tabela de indice de paginas
+        pos = preprocessamentoDecrescente(tabela, arq, qtd);
+
+        resultado = pesquisaDecrescente(tabela, pos, &x, arq, &comparacoes);
+
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    }
+
+    if(resultado) {
+        printf("\nRegistro encontrado!");
+        printf("Item: %d | %ld, %s \n", x.chave, x.dado1, x.dado2);
+    } else {
+        printf("\nRegistro não foi encontrado!");
+    }        
+
+    printf(ANSI_COLOR_BLUE "\nCOMPARACOES       : %d" ANSI_COLOR_RESET, comparacoes);
+    printf(ANSI_COLOR_BLUE "\nTEMPO DE EXECUCAO : %lf segundos" ANSI_COLOR_RESET, cpu_time_used);
+
+    fclose(arq);
+}
+
 // Gerando a tabela de índice das páginas
 // Retorna pos = tamanho da tabela de indice de paginas
 int preprocessamento(tipoindice tabela[], FILE *arq, int quantidade) {
@@ -152,11 +203,6 @@ int pesquisaDecrescente (tipoindice tab[], int tam, Item* item, FILE *arq, int *
         return 0;
     }
 }
-
-// ###################################################
-
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
 
 int teste(FILE *arq) {
     int pos, qtd; int comparacoes = 0;
