@@ -2,12 +2,12 @@ main: main.o index.o
 	g++ main.o -o main
 
 main.o: main.cpp
-	g++ -c main.cpp
+	g++ -std=c++0x main.cpp
 
 ################ Pesquisa Sequencial Indexada ################
 
 index.o: ./sequencial_indexado/index.cpp
-	g++ -c ./sequencial_indexado/index.cpp
+	g++ -std=c++0x ./sequencial_indexado/index.cpp
 
 clean:
 	del -f *.o main.exe
@@ -17,7 +17,7 @@ remove:
 
 ################ Árvore B* ################
 b_star.o: ./arvore_b_estrela/b_star.cpp
-	g++ -c ./arvore_b_estrela/b_star.cpp
+	g++ -std=c++0x -Wall ./arvore_b_estrela/b_star.cpp
 
 clean:
 	del -f *.o b_star.exe

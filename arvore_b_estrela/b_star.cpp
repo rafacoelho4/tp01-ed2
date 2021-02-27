@@ -39,9 +39,9 @@ void b_star(int chave, const char* arq, int size, bool P);
 void imprimir(Apontador* ap, int chave, long int* transfer, long int* compare);
 Item** ler_arquivo(FILE** file, int size, long int* transfer, long int* compare);
 void inserir(Item* item, Apontador* ap, long int* transfer, long int* compare);
-void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* grew, long i, long int* transfer, long int* compare);
-void ins_bstar(Item item, Apontador ap, short* grew, Item* rr, Apontador*pr, long int* transfer, long int* compare);
-void inserir_no_nodo_star(Apontador ap, Item item, Apontador right, long int* transfer, long int* compare);
+void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* cresceu, long i, long int* transfer, long int* compare);
+void ins_bstar(Item item, Apontador ap, short* cresceu, Item* rr, Apontador*pr, long int* transfer, long int* compare);
+void inserir_no_nodo_star(Apontador ap, Item item, Apontador direita, long int* transfer, long int* compare);
 void pesquisa_bstar(Item* item, Apontador *p, long int* transfer, long int* compare);
 
 int abre_arquivo_bin(FILE **file, const char* name, const char* type){
@@ -58,7 +58,7 @@ void b_star(int chave, const char* arq, int size, bool P){
 	Apontador* arvore = NULL;
 
     if(abre_arquivo_bin(&input_file, arq, "r+b")){
-        cout << "\n\n\n\noi" << arq;
+        //cout << "\n\n\n\noi" << arq;
 
 		// Cria um vetor com os itens do arquivo binário
 		Item** itens = ler_arquivo(&input_file, size, &transf, &comp);
@@ -67,10 +67,11 @@ void b_star(int chave, const char* arq, int size, bool P){
 
 		// Insere os itens do arquivo binário na árvore
 		for (int i = 0; i < size; i++) {
+            cout<<"\nINSERINDO ITEM %d\n" << i;
 			inserir(itens[i], arvore, &transf, &comp);
 		}
 
-		comp = 0; transf = 0;
+	/* 	comp = 0; transf = 0;
 
 		g1 = (clock() - g1)/(CLOCKS_PER_SEC/1000);
 		printf("Insercao Arvore B*\n\t- Tempo: %15lld ms\n\t- Comparacoes: %12ldx\n\t- Tranferencias: %9ldx\n\n",
@@ -87,13 +88,15 @@ void b_star(int chave, const char* arq, int size, bool P){
 
 		if(P){ // imprime a árvore
 		//printBStarTree(tree, key, transference, compare);
+		imprimir(arvore, chave, transf, comp);
 		}
 
 		for (size_t i = 0; i < size; i++){
         	free(itens[i]);
     	}
-    	free(item);
-    }
+
+    	free(item); */
+    } 
 }
 
 void imprimir(Apontador* ap, int chave, long int* transfer, long int* compare){
@@ -130,7 +133,7 @@ Item** ler_arquivo(FILE** file, int size, long int* transfer, long int* compare)
 		item[i] = (Item*) calloc(1,sizeof(Item));
 	}
 
-	// le registro por registro e insere na variavel auxiliar criada
+	// Lê registro por registro e insere na variável auxiliar criada
 	int i = 0;
 	while (fread(&aux, sizeof(Item), 1, *file) && size > i){
 		*transfer += 1;
@@ -147,7 +150,7 @@ Item** ler_arquivo(FILE** file, int size, long int* transfer, long int* compare)
 
 // Transfer e compare são contadores p/ o nº de transferências e comparações
 void inserir(Item* item, Apontador* ap, long int* transfer, long int* compare){
-	short grew;
+	short cresceu;
 
 	Item rr, temp = *item;
 	Nodo *pr, *p_temp;
@@ -161,8 +164,8 @@ void inserir(Item* item, Apontador* ap, long int* transfer, long int* compare){
 		return;
 	}
 	else{
-		ins_bstar(temp, *ap, &grew, &rr, &pr, transfer, compare);
-		if (grew == 1){
+		ins_bstar(temp, *ap, &cresceu, &rr, &pr, transfer, compare);
+		if (cresceu == 1){
 			p_temp = (Nodo*) calloc(1, sizeof(Nodo));
 			p_temp->st = INTERNA;
 			p_temp->UU.UI.n_int = 1;
@@ -175,7 +178,7 @@ void inserir(Item* item, Apontador* ap, long int* transfer, long int* compare){
 }
 
 // Função que insere uma nova chave na página externa da árvore
-void ins_bstar(Item item, Apontador ap, short* grew, Item* rr, Apontador*pr, long int* transfer, long int* compare){
+void ins_bstar(Item item, Apontador ap, short* cresceu, Item* rr, Apontador*pr, long int* transfer, long int* compare){
 	int i = 1;
 
 	if (ap->st == EXTERNA) {
@@ -183,7 +186,7 @@ void ins_bstar(Item item, Apontador ap, short* grew, Item* rr, Apontador*pr, lon
 		if (ap->UU.UE.n_ext < MM){
 			*rr = item;
 			inserir_no_nodo_star(ap, *rr, *pr, transfer, compare);
-			*grew = 0;
+			*cresceu = 0;
 			return;
 		}
 		else{
@@ -221,15 +224,15 @@ void ins_bstar(Item item, Apontador ap, short* grew, Item* rr, Apontador*pr, lon
 			ap->UU.UE.n_ext = M;
 			*rr = ap->UU.UE.item_ext[M];
 			*pr = temp;
-			*grew = 1;
+			*cresceu = 1;
 			return;
 		}
 	}
-	inserir_bstar(ap, pr, rr, item, grew, i, transfer, compare);
+	inserir_bstar(ap, pr, rr, item, cresceu, i, transfer, compare);
 }
 
 // Função que insere seleciona a ramificacão adequada p/ inserção
-void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* grew, long i, long int* transfer, long int* compare){
+void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* cresceu, long i, long int* transfer, long int* compare){
 	*compare += 1;
 	while (i < ap->UU.UI.n_int && item.chave > ap->UU.UI.chave_int[i-1]){
 		*compare += 1;
@@ -239,18 +242,17 @@ void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* grew
 	*compare += 1;
 	if(item.chave < ap->UU.UI.chave_int[i-1]) i--;
 
-	ins_bstar(item, ap->UU.UI.p_int[i], grew, rr, pr, transfer, compare);
-	if(*grew == 0) return;
+	ins_bstar(item, ap->UU.UI.p_int[i], cresceu, rr, pr, transfer, compare);
+	if(*cresceu == 0) return;
 
 	if (ap->UU.UI.n_int < MM){
 		inserir_no_nodo_star(ap, *rr, *pr, transfer, compare);
-		*grew = 0;
+		*cresceu = 0;
 		return;
 	}
-
 	
 	if (item.chave == ap->UU.UI.chave_int[i-1]) {
-		*grew = 0;
+		*cresceu = 0;
 		return;
 	}
 
@@ -285,25 +287,25 @@ void inserir_bstar(Apontador ap, Apontador* pr, Item* rr, Item item, short* grew
 }
 
 // Função que insere na página o item
-void inserir_no_nodo_star(Apontador ap, Item item, Apontador right, long int* transfer, long int* compare){
-	short position;
+void inserir_no_nodo_star(Apontador ap, Item item, Apontador direita, long int* transfer, long int* compare){
+	short posicao;
 	int k;
 
 	if (ap->st == EXTERNA){
 		k = ap->UU.UE.n_ext;
-		position = (k > 0);
+		posicao = (k > 0);
 
 		*compare += 1;
-		while (position > 0){
+		while (posicao > 0){
 			*compare += 1;
 			if (item.chave >= ap->UU.UE.item_ext[k-1].chave){
-				position = 0;
+				posicao = 0;
 				break;
 			}
 			ap->UU.UE.item_ext[k] = ap->UU.UE.item_ext[k-1];
 			k--;
 
-			if(k < 1) position = 0;
+			if(k < 1) posicao = 0;
 		}
 
 		ap->UU.UE.item_ext[k] = item;
@@ -311,20 +313,21 @@ void inserir_no_nodo_star(Apontador ap, Item item, Apontador right, long int* tr
 	}
 	else{
 		k = ap->UU.UI.n_int;
-		position = (k > 0);
+		posicao = (k > 0);
 
-		while (position > 0){
+		while (posicao > 0){
+			*compare += 1;
 			if (item.chave >= ap->UU.UI.chave_int[k-1]){
-				position = 0;
+				posicao = 0;
 				break;
 			}
 			ap->UU.UI.chave_int[k] = ap->UU.UI.chave_int[k-1];
 			ap->UU.UI.p_int[k+1] = ap->UU.UI.p_int[k];
 			k--;
-			if(k < 1) position = 0;
+			if(k < 1) posicao = 0;
 		}
 		ap->UU.UI.chave_int[k] = item.chave;
-		ap->UU.UI.p_int[k+1] = right;
+		ap->UU.UI.p_int[k+1] = direita;
 		ap->UU.UI.n_int++;
 		return;
 	}
