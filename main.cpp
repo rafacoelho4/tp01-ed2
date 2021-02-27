@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     if (metodo == 1) {
         if(situacao == 3) {
-            return;
+            return 0;
         } else if (situacao == 1) {
             criarArquivoCrescente(qtd);
             sequencial_indexado(situacao, chave, qtd, parametro);

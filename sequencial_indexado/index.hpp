@@ -13,12 +13,12 @@ typedef struct {
     int chave;
 } tipoindice;
 
-int preprocessamento(tipoindice tabela[], FILE *arq, int quantidade);
+int preprocessamento(tipoindice tabela[], FILE *arq, int quantidade, double *tempo);
 
-int pesquisa (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes);
+int pesquisa (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes, double *tempo);
 
-int preprocessamentoDecrescente(tipoindice tabela[], FILE *arq, int quantidade);
+int preprocessamentoDecrescente(tipoindice tabela[], FILE *arq, int quantidade, double *tempo);
 
-int pesquisaDecrescente (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes);
+int pesquisaDecrescente (tipoindice tab[], int tam, Item* item, FILE *arq, int *comparacoes, double *tempo);
 
 #endif
