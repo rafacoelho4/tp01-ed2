@@ -50,7 +50,7 @@ void criarArquivoCrescente (int tamanho ) {
         printf("Erro ao ler arquivo");
     }
 
-    // LEITURA FUNCIONANDO
+   /*  // LEITURA FUNCIONANDO
     i = 0;
     while (fread(&leitura, sizeof(Item), 1, newf) == 1) {
         // printf("\n\nIndex: %d\n", i + 1);
@@ -59,7 +59,7 @@ void criarArquivoCrescente (int tamanho ) {
         printf("Dado 2: %s", leitura.dado2);
         if(i > 10) break;
         i++;
-    }
+    } */
 
     fclose(newf);
 }
@@ -108,14 +108,14 @@ void criarArquivoDecrescente (int tamanho) {
 
     // LEITURA FUNCIONANDO
     int i = 0;
-    while (fread(&leitura, sizeof(Item), 1, newff) == 1) {
+  /*   while (fread(&leitura, sizeof(Item), 1, newff) == 1) {
         // printf("\n\nIndex: %d\n", i + 1);
         printf("\n\nChave: %d\n", leitura.chave);
         printf("Dado 1: %ld\n", leitura.dado1);
         printf("Dado 2: %s", leitura.dado2);
         if(i > 10) break;
         i++;
-    }
+    } */
 
     fclose(newff);
 }

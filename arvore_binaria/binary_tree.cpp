@@ -1,6 +1,6 @@
 #include "binary_tree.hpp"
 
-void binary_tree( int key, const char* name ){
+void binary_tree( int key, const char* name, bool parametro ){
     
     long long comp=0, transf=0;
     FILE* output_file;
@@ -14,17 +14,17 @@ void binary_tree( int key, const char* name ){
         //Volta para o início do arquivo
         rewind(output_file);
         //realiza a pesquisa do item 18
-        search( key, output_file);      
+        search( key, output_file, parametro);      
     } 
     fclose(output_file);
     fclose(input_file);             
 }
 
-void search(int key, FILE* output_file){
+void search(int key, FILE* output_file, bool parametro){
      long long transf=0;  
      long long comp=0;
     clock_t start = clock();
-        if(search_node( key, &output_file, &transf, &comp)){
+        if(search_node( key, &output_file, &transf, &comp,parametro)){
             cout<<"item encontrado"<<endl;
         }
         else{
@@ -136,7 +136,7 @@ int insert_left_node( Node node, Node aux, int count, int* position, FILE** file
     return 0;   
 }
 
- int search_node( int key, FILE** file,  long long*transf ,  long long*comp){
+ int search_node( int key, FILE** file,  long long*transf , long long*comp, bool parametro){
     
     Node aux;
     int position = 0;
@@ -144,9 +144,12 @@ int insert_left_node( Node node, Node aux, int count, int* position, FILE** file
     while ( fread(&aux, sizeof( Node), 1, *file) == 1 )
     {
         fseek( *file, position*sizeof(Node), SEEK_SET);
-        (*transf)++;
+    
         if(fread( &aux, sizeof(Node), 1, *file ) == 1){
             (*transf)++;
+            if(parametro)
+                cout<<aux.reg.key;
+                
             if(key > aux.reg.key){
                 (*comp)++;
                 position = aux.left;

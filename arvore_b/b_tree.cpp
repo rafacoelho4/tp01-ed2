@@ -3,7 +3,7 @@ using namespace std;
 
 #define M 2
 
-void b_tree(int key, const char* name){
+void b_tree(int key, const char* name, bool parametro){
     //Arquivo de entrada
     FILE* input_file;
     //Alocando o ponteiro para a raiz da arvore
@@ -31,16 +31,22 @@ void b_tree(int key, const char* name){
         double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
         cout<<"Tempo total: "<<cpu_time_used<<endl;   
        
-        //Imprimindo a arvore
-        print(tree);
-
         r.key = key;
-        if(search(&r,tree)){
-            cout<<"\n\n\n\nitem encontrado";
+        comp = 0;
+        start = clock();
+        if(search(&r,tree,&comp,parametro )){
+            cout<<"\nRegistro encontrado!";
+            printf("Item: %d | %ld, %s \n", r.key, r.data1, r.data2);
         }
         else{
-             cout<<"\n\n\n\nitem n encontrado\n";
+             cout<<"\nRegistro não foi encontrado!";
         } 
+        end = clock();
+        cout<<"\nTempo busca: \n";
+        cout<<"Quantidade de comparações: "<<(comp)<<endl;
+        cout<<"Quantidade de transferencias: "<<transf<<endl;
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        cout<<"Tempo total: "<<cpu_time_used<<endl;
        
     } 
     fclose(input_file);   
@@ -66,7 +72,7 @@ void print(Pointer* tree){
     
 }
 
-bool search( Register* r, Pointer* tree ){
+bool search( Register* r, Pointer* tree,long long *comp, bool parametro ){
      int i = 1;
 
     if( tree == NULL){
@@ -74,24 +80,33 @@ bool search( Register* r, Pointer* tree ){
     }
 
     //Caminha na página até encontrar o local desejado
+    (*comp)++;
      while(i < tree->n && r->key > tree->r[i-1].key){
-         i++;
+        cout<<"\noi";
+        if(parametro)
+            cout<<"\n"<< tree->r[i-1].key<<" "<<tree->n;
+        i++;
+        (*comp)++;
      } 
 
     //Compara o valor, caso seja igual : retorna verdadeiro e a pesquisa se encerra
+    (*comp)++;
      if(r->key == tree->r[i-1].key){
+         if(parametro)
+            cout<<"\n"<< tree->r[i-1].key;
         *r = tree->r[i-1];
         return true;
     }
     
     //Caso o valor do registro seja menor que o ultimo registro da pagina: caminhamento à esquerda
+    (*comp)++;
     if(r->key < tree->r[i-1].key){
-       
-        search( r, tree->p[i-1]);
+        search( r, tree->p[i-1], comp,parametro);
     }
     
     //Caso contrário: caminhamento à direita
-    else search( r, tree->p[i]);  
+    
+    else search( r, tree->p[i],comp,parametro);  
     
 } 
 

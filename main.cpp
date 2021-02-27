@@ -25,6 +25,18 @@ int main(int argc, char *argv[])
     int qtd = atoi(argv[2]);
     int situacao = atoi(argv[3]);
     int chave = atoi(argv[4]);
+    
+    bool parametro = false;
+    if( argc > 5){
+        string p = argv[5];
+        if(p == "-P"){
+         parametro = true;
+        }
+        else{
+            cout<<"Parametro invalido\n";
+            exit(1);
+        }
+    }
 
     // argv deve ser:
     // pesquisa <metodo> <quantidade> <situação> <chave> [-P]
@@ -92,7 +104,7 @@ int main(int argc, char *argv[])
             printf("\nRegistro encontrado!");
             printf("Item: %d | %ld, %s \n", x.chave, x.dado1, x.dado2);
         } else {
-            printf("\nRegistro não foi encontrado :(");
+            printf("\nRegistro não foi encontrado!");
         }        
 
         printf(ANSI_COLOR_BLUE "\nCOMPARACOES       : %d" ANSI_COLOR_RESET, comparacoes);
@@ -105,31 +117,31 @@ int main(int argc, char *argv[])
     if (metodo == 2) {
         if(situacao == 1 ){
             criarArquivoCrescente(qtd);
-            binary_tree(chave,"crescente.bin");
+            binary_tree(chave,"crescente.bin",parametro);
         }
         else if(situacao == 2 ){
             criarArquivoDecrescente(qtd);
-            binary_tree(chave,"decrescente.bin");
+            binary_tree(chave,"decrescente.bin",parametro);
         }
         else{
             criarArquivoAleatorio(qtd);
-            binary_tree(chave,"aleatorio.bin");
+            binary_tree(chave,"aleatorio.bin",parametro);
         }
     }
 
      if (metodo == 3) {
         if(situacao == 1 ){
             criarArquivoCrescente(qtd);
-            b_tree(chave,"crescente.bin");
+            b_tree(chave,"crescente.bin",parametro);
         }
         else if(situacao == 2 ){
             criarArquivoDecrescente(qtd);
-             b_tree(chave,"decrescente.bin");
+             b_tree(chave,"decrescente.bin",parametro);
             
         }
         else{
             criarArquivoAleatorio(qtd);
-             b_tree(chave,"aleatorio.bin");
+             b_tree(chave,"aleatorio.bin",parametro);
             
         }
     }
