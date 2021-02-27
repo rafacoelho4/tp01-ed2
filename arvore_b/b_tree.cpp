@@ -49,8 +49,7 @@ void b_tree(int key, const char* name, bool parametro){
         cout<<"Tempo total: "<<cpu_time_used<<endl;
        
     } 
-    fclose(input_file);   
-        
+    fclose(input_file);          
 }
 
 void print(Pointer* tree){

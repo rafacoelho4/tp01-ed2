@@ -57,6 +57,7 @@ void b_star(int chave, const char* arq, int size, bool P){
 	long int comp = 0, transf = 0;
     FILE* input_file;
 	Apontador* arvore = NULL;
+    
 
     if(abre_arquivo_bin(&input_file, arq, "r+b")){
         cout << "\n\n\n\noi" << arq;
@@ -68,11 +69,10 @@ void b_star(int chave, const char* arq, int size, bool P){
 
 		// Insere os itens do arquivo binário na árvore
 		for (int i = 0; i < size; i++) {
-            cout<<"maria\n";
 			inserir(itens[i], arvore, &transf, &comp);
 		}
 
-	/* 	comp = 0; transf = 0;
+	 	comp = 0; transf = 0;
 
 		g1 = (clock() - g1)/(CLOCKS_PER_SEC/1000);
 		printf("Insercao Arvore B*\n\t- Tempo: %15lld ms\n\t- Comparacoes: %12ldx\n\t- Tranferencias: %9ldx\n\n",
@@ -94,7 +94,7 @@ void b_star(int chave, const char* arq, int size, bool P){
 		for (size_t i = 0; i < size; i++){
         	free(itens[i]);
     	}
-    	free(item); */
+    	free(item); 
     } 
 }
 
@@ -154,12 +154,13 @@ void inserir(Item* item, Apontador* ap, long int* transfer, long int* compare){
 	Item rr, temp = *item;
 	Nodo *pr, *p_temp;
 
-	if (*ap == NULL){ // Inicializa a Árvore B* caso necessário
+	if (ap == NULL){ // Inicializa a Árvore B* caso necessário
+        cout<<"oi\n";
 		p_temp = (Nodo*) calloc(1, sizeof(Nodo));
 		p_temp->st = EXTERNA;
 		p_temp->UU.UE.n_ext = 1;
 		p_temp->UU.UE.item_ext[0] = temp;
-		*ap = p_temp;
+		ap = &p_temp;
 		return;
 	}
 	else{
@@ -334,15 +335,17 @@ void inserir_no_nodo_star(Apontador ap, Item item, Apontador right, long int* tr
 
 // Função que faz a pesquisa dentro da árvore
 void pesquisa_bstar(Item* item, Apontador *p, long int* transfer, long int* compare){
+     cout<<"oi";
     int i;
 
-    Apontador pag = *p;
+    Apontador* pag = (p);
 
-	// Pesquisa na página interna
-    if ((*p)->st == INTERNA){
-        i = 1;
+	 //Pesquisa na página interna
+    //if ( (*p)->st == INTERNA){
+       
+        //i = 1;
 
-		// Pesquisa o intervalo no qual o registro pode estar
+		/* // Pesquisa o intervalo no qual o registro pode estar
 		*compare += 2;
         while (i < pag->UU.UI.n_int && item->chave > pag->UU.UI.chave_int[i - 1]){
 			*compare += 2;
@@ -355,12 +358,12 @@ void pesquisa_bstar(Item* item, Apontador *p, long int* transfer, long int* comp
 		}
         else{
 			pesquisa_bstar(item, &pag->UU.UI.p_int[i], transfer, compare);
-		}
+		} */
 
-        return;
-    }
+        //return;
+    //}
 
-    i = 1;
+ /*    i = 1;
 
 	*compare += 1;
     while (i < pag->UU.UE.n_ext && item->chave > pag->UU.UE.item_ext[i - 1].chave){
@@ -375,6 +378,6 @@ void pesquisa_bstar(Item* item, Apontador *p, long int* transfer, long int* comp
 		printf("Registro encontrado!\n");
 	}
     else{
-		printf("Registro não encontrado!\n");
-	}
+		printf("Registro não encontrado\n"); */
+	//}
 }

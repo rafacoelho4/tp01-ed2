@@ -8,7 +8,6 @@ void binary_tree( int key, const char* name, bool parametro ){
     //caso o arquivo abra com sucesso, executa:
      if(open_binary_file( &output_file,"arvore.bin","w+b")&& open_binary_file( &input_file,name,"r+b")){
       
-        cout<<"\n\n\n\noi"<<name;
         insert(output_file, input_file, &transf, &comp);
         comp=0; transf=0;
         //Volta para o início do arquivo
@@ -148,8 +147,8 @@ int insert_left_node( Node node, Node aux, int count, int* position, FILE** file
         if(fread( &aux, sizeof(Node), 1, *file ) == 1){
             (*transf)++;
             if(parametro)
-                cout<<aux.reg.key;
-                
+                cout<<"\n"<<aux.reg.key;
+
             if(key > aux.reg.key){
                 (*comp)++;
                 position = aux.left;
