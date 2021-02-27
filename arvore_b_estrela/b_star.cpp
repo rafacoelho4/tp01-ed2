@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <time.h>
 #include "../tipos.hpp"
 
 using namespace std;

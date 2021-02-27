@@ -7,6 +7,8 @@
 #include "./arvore_binaria/binary_tree.cpp"
 #include "./gerador_de_arquivos/arquivo.cpp"
 #include "./arvore_b_estrela/b_star.cpp"
+#include "./arvore_b/b_tree.cpp"
+
 #define ANSI_COLOR_BLUE    "\x1b[34m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
@@ -118,18 +120,21 @@ int main(int argc, char *argv[])
      if (metodo == 3) {
         if(situacao == 1 ){
             criarArquivoCrescente(qtd);
+            b_tree(chave,"crescente.bin");
         }
         else if(situacao == 2 ){
             criarArquivoDecrescente(qtd);
+             b_tree(chave,"decrescente.bin");
             
         }
         else{
             criarArquivoAleatorio(qtd);
+             b_tree(chave,"aleatorio.bin");
             
         }
     }
     
-    if (metodo == 4) { 
+       if (metodo == 4) { 
         cout<<"oi:";
    
         if(situacao == 1 ){
@@ -148,8 +153,8 @@ int main(int argc, char *argv[])
             criarArquivoAleatorio(qtd);
              b_star(chave, "aleatorio.bin", qtd, false);
 
-        }
-    }
+        } 
+    } 
 
     return 0;
 }

@@ -1,43 +1,50 @@
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "b_tree.hpp"
 using namespace std;
 
 #define M 2
-typedef struct Node Node;
-typedef struct Node Pointer;
 
-typedef struct{
-    int key;
-    int data[100];
-}Register;
-
-struct Node{
-    int n;
-    Register r[(M*M)];
-    Pointer* p[(M*M)+1];
-};
-
-
-void print(Pointer* tree);
-void insert(Register reg, Pointer** tree);
-bool search(Register* reg, Pointer* tree);
-void insert_on_node(Pointer** tree, Register* reg, Pointer** right);
-void find_to_insert(Register reg, Pointer** tree, bool* grew, Register* rr, Pointer** pr);
-
-int main(){
-    Pointer* tree =(Pointer*) malloc( sizeof(Node));
+void b_tree(int key, const char* name){
+    //Arquivo de entrada
+    FILE* input_file;
+    //Alocando o ponteiro para a raiz da arvore
+    Pointer* tree =(Pointer*) malloc( sizeof(NodeT));
+    //Setando a raiz da arvore em Nulo no primeiro momento
     tree = NULL;
+    //Criando a variavel auxilar de registro
     Register r;
-
-    int vet[23] = { 11, 36, 53, 95, 8, 91, 81, 48, 25, 27, 31, 16, 21, 59, 63, 72, 78, 14, 13, 12, 35, 33, 42};
-     for( int i = 0; i < 23; i++){
-        r.key= vet[i];
-        insert( r, &tree );
-    }   
+    //Criando contadores de transferencias e comparaçoes
+    long long transf = 0, comp = 0;
+    //Verificando se o arquivo foi aberto com sucesso
+    if(open_binary_file( &input_file,name,"rb")){
+        //Lendo os registros do arquivo e inserindo na arvore
+        clock_t start = clock();
+        (transf)++;
+        while (fread(&r,sizeof(Register),1,input_file) == 1)
+        {
+            insert( r, &tree, &comp );
+            (transf)++;
+        }
+        clock_t end = clock();
+        cout<<"Tempo inserção:\n";
+        cout<<"Quantidade de comparações: "<<(comp)<<endl;
+        cout<<"Quantidade de transferencias: "<<transf<<endl;
+        double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        cout<<"Tempo total: "<<cpu_time_used<<endl;   
+       
+        //Imprimindo a arvore
         print(tree);
-    
+
+        r.key = key;
+        if(search(&r,tree)){
+            cout<<"\n\n\n\nitem encontrado";
+        }
+        else{
+             cout<<"\n\n\n\nitem n encontrado\n";
+        } 
+       
+    } 
+    fclose(input_file);   
+        
 }
 
 void print(Pointer* tree){
@@ -60,10 +67,16 @@ void print(Pointer* tree){
 }
 
 bool search( Register* r, Pointer* tree ){
-    long i = 1;
+     int i = 1;
+
+    if( tree == NULL){
+        return false;
+    }
 
     //Caminha na página até encontrar o local desejado
-    while(i < tree->n && r->key > tree->r[i-1].key) i++;
+     while(i < tree->n && r->key > tree->r[i-1].key){
+         i++;
+     } 
 
     //Compara o valor, caso seja igual : retorna verdadeiro e a pesquisa se encerra
      if(r->key == tree->r[i-1].key){
@@ -72,19 +85,19 @@ bool search( Register* r, Pointer* tree ){
     }
     
     //Caso o valor do registro seja menor que o ultimo registro da pagina: caminhamento à esquerda
-    if(r->key < tree->r[i-1].key)
+    if(r->key < tree->r[i-1].key){
+       
         search( r, tree->p[i-1]);
+    }
     
     //Caso contrário: caminhamento à direita
-    search( r, tree->p[i]);
+    else search( r, tree->p[i]);  
     
-    //retorna falso caso não encontre o valor
-    return false;
 } 
 
 
-void insert(Register reg, Pointer** tree){
-   
+void insert(Register reg, Pointer** tree,long long *comp){
+    
     //Variável responsavel por verificar se a arvore cresceu
     bool grew;
     //Armazena o registro de retorno
@@ -94,21 +107,22 @@ void insert(Register reg, Pointer** tree){
     //Ponteiro de páginas temporários
     Pointer* p_temp;
     //Realiza uma busca na arvore para inserir o registro reg
-    find_to_insert(reg, tree, &grew, &rr, &pr);
+    find_to_insert(reg, tree, &grew, &rr, &pr, comp);
      
-
+    
     //Criação de um novo nó raiz
      if(grew){
-        p_temp  =(Pointer*) malloc( sizeof(Node));
+        p_temp  =(Pointer*) malloc( sizeof(NodeT));
         p_temp->n = 1;
         p_temp->r[0] = rr;
         p_temp->p[1] = pr;
         p_temp->p[0] = (*tree);
         *tree = p_temp;
-    } 
+    }
+    comp++; 
 }
 
-void find_to_insert(Register reg, Pointer** tree, bool *grew, Register* rr, Pointer** pr){
+void find_to_insert(Register reg, Pointer** tree, bool *grew, Register* rr, Pointer** pr,long long *comp){
     //Variável que caminha pelas paginas
     long i = 1;
     //Variável responsável por definir local de divisão dos filhos à direita da página
@@ -117,6 +131,7 @@ void find_to_insert(Register reg, Pointer** tree, bool *grew, Register* rr, Poin
     Pointer* p_temp;
     
     //Verifica se arvore está vazia e retorna os valores para a criação da raiz
+   (*comp)++;
    if(*tree == NULL){
         *grew = true;
         *rr = reg;
@@ -125,9 +140,12 @@ void find_to_insert(Register reg, Pointer** tree, bool *grew, Register* rr, Poin
     }  
 
      //Laço que caminha pela pagina apontada pela raiz da arvore
-    while(i < (*tree)->n && reg.key >(*tree)->r[i-1].key)  i++;
+    (*comp)++;
+    while(i < (*tree)->n && reg.key >(*tree)->r[i-1].key){  i++;(*comp)++;};
     
     //Verificação caso o registro já esteja presente na arvore
+    
+    (*comp)++;
     if(reg.key ==(*tree)->r[i-1].key){
         cout<<"Erro: O registro já se encontra na arvore";
         *grew = false;
@@ -135,38 +153,42 @@ void find_to_insert(Register reg, Pointer** tree, bool *grew, Register* rr, Poin
     }
     
     //A proxima procura será com o filho a esquerda caso a chave seja menor que o ultimo registro
+    (*comp)++;
     if(reg.key < (*tree)->r[i-1].key) i--;
 
     //Realiza a pesquisa na subarvore selecionada
-    find_to_insert(reg, &((*tree)->p[i]), grew, rr, pr);
+    find_to_insert(reg, &((*tree)->p[i]), grew, rr, pr,comp);
 
     //Verifica se será necessaria a criação de uma nova pagina
+    (*comp)++;
     if(!(*grew)) return;
 
     //Caso a pagina tenha espaço
+    (*comp)++;
     if( (*tree)->n < (M*M)){
-        insert_on_node( tree, rr, pr);
+        insert_on_node( tree, rr, pr,comp);
         *grew = false;
         return;
     }
 
     //Caso a pagina precise ser dividida
     //Aloca ponteiro auxiliar e inicializa
-    p_temp = (Pointer*) malloc( sizeof(Node) );
+    p_temp = (Pointer*) malloc( sizeof(NodeT) );
     p_temp->n = 0;
     p_temp->p[0] = NULL;
 
+    (*comp)++;
     if(i < (M+1)){
-        insert_on_node(&p_temp,&(*tree)->r[(M*M)-1],&(*tree)->p[(M*M)]);
+        insert_on_node(&p_temp,&(*tree)->r[(M*M)-1],&(*tree)->p[(M*M)],comp);
         (*tree)->n--;
-        insert_on_node(tree, rr, pr);
+        insert_on_node(tree, rr, pr,comp);
     }
 
-    else insert_on_node(&p_temp, rr, pr);
+    else {(*comp)++; insert_on_node(&p_temp, rr, pr,comp);}
 
     //Processo de divisão das paginas
     for( j = M + 2; j <=(M*M); j++ ){
-        insert_on_node(&p_temp,&(*tree)->r[j-1],&(*tree)->p[j]);
+        insert_on_node(&p_temp,&(*tree)->r[j-1],&(*tree)->p[j],comp);
     }
     
    (*tree)->n = M;
@@ -175,11 +197,12 @@ void find_to_insert(Register reg, Pointer** tree, bool *grew, Register* rr, Poin
     *pr = p_temp;
 }
 
-void insert_on_node(Pointer** tree, Register* reg, Pointer** right){
+void insert_on_node(Pointer** tree, Register* reg, Pointer** right, long long* comp){
     int k = (*tree)->n;
     bool not_find_position = (k > 0);
     //Caso a página tenha itens, rearanja para inserir na posição correta
     while( not_find_position){
+       (*comp)++;
         if( reg->key >= (*tree)->r[k-1].key ){
             not_find_position = false;
             break;

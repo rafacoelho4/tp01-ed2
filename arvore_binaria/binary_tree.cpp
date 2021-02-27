@@ -15,7 +15,9 @@ void binary_tree( int key, const char* name ){
         rewind(output_file);
         //realiza a pesquisa do item 18
         search( key, output_file);      
-    }                    
+    } 
+    fclose(output_file);
+    fclose(input_file);             
 }
 
 void search(int key, FILE* output_file){

@@ -1,18 +1,13 @@
 #ifndef BINARY_TREE
 #define BINARY_TREE
 
+#include "../tipos.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
+
 using namespace std;
-
-
-typedef struct{
-    int key;
-    long int data1;
-    char data2[501];
-}Register;
 
 typedef struct{
     Register reg;
