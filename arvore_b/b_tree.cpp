@@ -81,7 +81,6 @@ bool search( Register* r, Pointer* tree,long long *comp, bool parametro ){
     //Caminha na página até encontrar o local desejado
     (*comp)++;
      while(i < tree->n && r->key > tree->r[i-1].key){
-        cout<<"\noi";
         if(parametro)
             cout<<"\n"<< tree->r[i-1].key<<" "<<tree->n;
         i++;
@@ -105,7 +104,7 @@ bool search( Register* r, Pointer* tree,long long *comp, bool parametro ){
     
     //Caso contrário: caminhamento à direita
     
-    else search( r, tree->p[i],comp,parametro);  
+    else{ (*comp)++; search( r, tree->p[i],comp,parametro);}  
     
 } 
 
@@ -133,7 +132,6 @@ void insert(Register reg, Pointer** tree,long long *comp){
         p_temp->p[0] = (*tree);
         *tree = p_temp;
     }
-    comp++; 
 }
 
 void find_to_insert(Register reg, Pointer** tree, bool *grew, Register* rr, Pointer** pr,long long *comp){
