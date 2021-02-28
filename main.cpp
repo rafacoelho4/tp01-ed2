@@ -73,24 +73,18 @@ int main(int argc, char *argv[])
     }
     
        if (metodo == 4) { 
-        cout<<"oi:";
-   
+    
         if(situacao == 1 ){
             criarArquivoCrescente(qtd);
             b_star(chave, "crescente.bin", qtd, parametro);
-            
-           
-            // TODO: fclose(arq); aqui?
         }
         else if(situacao == 2 ){
             criarArquivoDecrescente(qtd);
              b_star(chave, "decrescente.bin", qtd, parametro);
-          
         }
         else{
             criarArquivoAleatorio(qtd);
              b_star(chave, "aleatorio.bin", qtd, parametro);
-
         } 
     } 
 
