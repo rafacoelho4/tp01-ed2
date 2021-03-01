@@ -5,7 +5,7 @@
 #define ANSI_COLOR_BLUE    "\x1b[34m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-void sequencial_indexado(int situacao, int chave, int qtd, bool parametro) {
+void sequencial_indexado(int situacao, int chave, int qtd, int parametro) {
     FILE *arq;
     // Nossa tabela consiste em números inteiros TAM_DO_ARQ / REG_POR_PAG
     int tabela[MAXTABELA];
@@ -24,14 +24,14 @@ void sequencial_indexado(int situacao, int chave, int qtd, bool parametro) {
             printf("Erro ao abrir arquivo"); 
             return;
         }
-        pos = preprocessamento(tabela, arq, qtd, &transferencias, &tempo1, parametro);
+        pos = preprocessamento(tabela, arq, qtd, &transferencias, &tempo1);
         resultado = pesquisa(tabela, pos, &x, arq, &comparacoes, &transferencias, &tempo2);
     } else if(situacao == 2) {
         if ((arq = fopen("decrescente.bin","rb")) == NULL) {
             printf("Erro ao abrir arquivo"); 
             return;
         }
-        pos = preprocessamentoDecrescente(tabela, arq, qtd, &transferencias, &tempo1, parametro);
+        pos = preprocessamentoDecrescente(tabela, arq, qtd, &transferencias, &tempo1);
         resultado = pesquisaDecrescente(tabela, pos, &x, arq, &comparacoes, &transferencias, &tempo2);
     }
 
@@ -51,7 +51,7 @@ void sequencial_indexado(int situacao, int chave, int qtd, bool parametro) {
 }
 
 // Gerando a tabela de índice das páginas
-int preprocessamento(int tabela[], FILE *arq, int quantidade, int *transferencias, double *tempo, bool p) {
+int preprocessamento(int tabela[], FILE *arq, int quantidade, int *transferencias, double *tempo) {
     // Uma página nada mais é que um conjunto de 4 items
     Item pag[ITENSPAGINA];
     int pos = 0, cont = 0;
@@ -79,14 +79,11 @@ int preprocessamento(int tabela[], FILE *arq, int quantidade, int *transferencia
     *tempo = cpu_time_used;
     
     // Imprimindo tabela de índices
-    if(p) {
-        int i;
-        for(i = 0; i < quantidade / ITENSPAGINA; i++) {
-            printf("\n%2d | %-8d", i, tabela[i]);
-        }
-        printf("\n");
-    }
-    
+    // int i;
+    // for(i = 0; i < quantidade / ITENSPAGINA; i++) {
+    //     printf("\n%2d | %2d | %-8d", i, tabela[i], tabela[i]);
+    // }
+
     fflush (stdout);
     return pos;
 }
@@ -158,7 +155,7 @@ int pesquisa (int tab[], int tam, Item* item, FILE *arq, int *comparacoes, int *
 }
 
 // Tabela ordenada decrescentemente
-int preprocessamentoDecrescente(int tabela[], FILE *arq, int quantidade, int *transferencias, double *tempo, bool p) {
+int preprocessamentoDecrescente(int tabela[], FILE *arq, int quantidade, int *transferencias, double *tempo) {
     Item pag[ITENSPAGINA];
     int pos = 0, cont = 0;
 
@@ -190,12 +187,10 @@ int preprocessamentoDecrescente(int tabela[], FILE *arq, int quantidade, int *tr
     *tempo = cpu_time_used;
     
     // Imprimir tabela de índices
-    if(p) {
-        int i;
-        for(i = 0; i < quantidade / ITENSPAGINA; i++) {
-            printf("\n%2d | %-8d", i, tabela[i]);
-        }
-    }
+    // int i;
+    // for(i = 0; i < quantidade / ITENSPAGINA; i++) {
+    //     printf("\n%2d | %2d | %-8d", i, tabela[i].posicao, tabela[i].chave);
+    // }
 
     fflush (stdout);
     return pos;

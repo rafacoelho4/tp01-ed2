@@ -1,5 +1,6 @@
 #include "b_star.hpp"
 
+// Função inicial para a chamada do método no main, recebe chave, arquivo, tamanho do arq. e o parâmetro opcional -P
 void b_star(int key, const char* file_name, int qtd, bool p) {
 	Register reg;
 	long int transfer = 0, compare = 0;
@@ -7,7 +8,7 @@ void b_star(int key, const char* file_name, int qtd, bool p) {
 	tree = NULL;
     FILE* input_file;
 
-    // abre o arquivo de dados
+    // Abre o arquivo com os registros
     if ((input_file = fopen(file_name, "rb")) == NULL) {
 		cout<<"Erro na abertura do arquivo\n";
 		exit(1);
@@ -15,17 +16,22 @@ void b_star(int key, const char* file_name, int qtd, bool p) {
 
    transfer++;
    clock_t start = clock();
-   while (fread(&reg,sizeof(Register),1,input_file) == 1)
-   {
+
+   // Inserindo os registros do arquivo na árvore B*
+   //printf("TRANSFERENCIAS:\n");
+   while (fread(&reg,sizeof(Register),1,input_file) == 1){
         insert_general(&reg,&tree,&transfer,&compare);
         transfer++;
+		//printf("%ld ", transfer);
    }
     clock_t end = clock();
-    cout<<"Tempo inserção:\n";
-    cout<<"Quantidade de comparações: "<<(compare)<<endl;
-    cout<<"Quantidade de transferencias: "<<transfer<<endl;
+
+	printf("\nINSERÇÃO:");
+    printf(ANSI_COLOR_BLUE "\nCOMPARACOES             : %ld" ANSI_COLOR_RESET, (compare));
+    printf(ANSI_COLOR_BLUE "\nTRANSFERENCIAS          : %ld" ANSI_COLOR_RESET, transfer);
     double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    cout<<"Tempo total: "<<cpu_time_used<<endl;
+    printf(ANSI_COLOR_BLUE "\nTEMPO PREPROCESSAMENTO  : %lf segundos" ANSI_COLOR_RESET, cpu_time_used);
+    printf("\n");
 
    reg.key = key; compare = 0; transfer = 0;
    start = clock();
@@ -33,35 +39,37 @@ void b_star(int key, const char* file_name, int qtd, bool p) {
         print(&tree, key, &transfer, &compare);
    }
 
-   search(&reg, &tree, &transfer, &compare);
+   	search(&reg, &tree, &transfer, &compare);
     end = clock();
-      cout<<"Tempo pesquisa:\n";
-    cout<<"Quantidade de comparações: "<<(compare)<<endl;
-    cout<<"Quantidade de transferencias: "<<transfer<<endl;
+
+	printf("\n");
+    printf("\nPESQUISA:");
+    printf(ANSI_COLOR_BLUE "\nCOMPARACOES             : %ld" ANSI_COLOR_RESET, (compare));
+    printf(ANSI_COLOR_BLUE "\nTRANSFERENCIAS          : %ld" ANSI_COLOR_RESET, transfer);
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    cout<<"Tempo total: "<<cpu_time_used<<endl;
+    printf(ANSI_COLOR_BLUE "\nTEMPO PREPROCESSAMENTO  : %lf segundos" ANSI_COLOR_RESET, cpu_time_used);
 
    fclose(input_file);
 }
 
-// funcao que pesquisa pela arvore b estrela
+// Função que pesquisa a chave desejada na árvore
 void search(Register* it, PointerS *p, long int* transfer, long int* compare) {
     int i;
 
     PointerS pag = *p;
 
-	// decide qual destino a seguir
+	// Começa pesquisando nas páginas internas
     if ((*p)->st == INTERNAL){
         i = 1;
 
-		// pesquisa o intervalo em que o registro pode estar
+		// Pesquisa o intervalo em que o registro pode estar
 		*compare += 2;
         while (i < pag->UU.UI.n_int && it->key > pag->UU.UI.key_int[i - 1]){
 			*compare += 2;
 			i++;
 		}
 
-		// seleciona o lado (direita ou esquerda) que deve ser pesquisado ate achar o registro
+		// Seleciona o lado (direito ou esquerdo) que deve ser percorrido até chegar numa página externa
         if (it->key < pag->UU.UI.key_int[i - 1]){
 			search(it, &pag->UU.UI.p_int[i - 1], transfer, compare);
 		}
@@ -74,6 +82,7 @@ void search(Register* it, PointerS *p, long int* transfer, long int* compare) {
 
     i = 1;
 
+	// Pesquisa pelo item desejado nas páginas externas
 	*compare += 1;
     while (i < pag->UU.UE.n_ext && it->key > pag->UU.UE.reg_ext[i - 1].key){
 		*compare += 1;
@@ -93,15 +102,14 @@ void search(Register* it, PointerS *p, long int* transfer, long int* compare) {
 
 
 
-// inicia a insercao da b estrela
+// Inicia a inserção da B*
 void insert_general(Register* reg, PointerS* pointer, long int* transfer, long int* compare){
 	short grown;
 
 	Register regReturn, temp = *reg;
 	Page *ApReturn, *ApTemp;
-	/*
-		inicializa a arvore b estrela caso ela seja vazia e inicializa a arvore b caso seja necessario
-	*/
+
+	// Inicializa a Árvore B* caso necessário
 	if (*pointer == NULL){
 		ApTemp = (Page*) calloc(1, sizeof(Page));
 		ApTemp->st = EXTERNAL;
@@ -110,7 +118,7 @@ void insert_general(Register* reg, PointerS* pointer, long int* transfer, long i
 		*pointer = ApTemp;
 		return;
 	}
-	else{
+	else{ // Se a árvore existe, insere item na página externa
 		ins_Bstar(temp, *pointer, &grown, &regReturn, &ApReturn, transfer, compare);
 		if (grown == 1){
 			ApTemp = (Page*) calloc(1, sizeof(Page));
@@ -124,7 +132,7 @@ void insert_general(Register* reg, PointerS* pointer, long int* transfer, long i
 	}
 }
 
-// funcao que insere uma nova chave na parte externa da arvore
+// Função que insere uma nova chave na parte externa da árvore
 void ins_Bstar(Register reg, PointerS pointer, short* grown, Register* regReturn, PointerS*ApReturn, long int* transfer, long int* compare){
 	int i = 1;
 
@@ -175,10 +183,12 @@ void ins_Bstar(Register reg, PointerS pointer, short* grown, Register* regReturn
 			return;
 		}
 	}
+
+	// Se não for inserir em página externa, chama a função que insere internamente
 	insert_Bstar(pointer, ApReturn, regReturn, reg, grown, i, transfer, compare);
 }
 
-// funcao que insere seleciona a ramificacao adequada para insercao
+// Função que seleciona a ramificação (interna) adequada para a inserção
 void insert_Bstar(PointerS pointer, PointerS* ApReturn, Register* regReturn, Register reg, short* grown, long i, long int* transfer, long int* compare){
 	*compare += 1;
 
@@ -235,7 +245,7 @@ void insert_Bstar(PointerS pointer, PointerS* ApReturn, Register* regReturn, Reg
 	return;
 }
 
-// funcao que insere na pagina o registro
+// Função que insere na página o registro
 void insert_on_page(PointerS pointer, Register reg, PointerS right, long int* transfer, long int* compare){
 	short position;
 	int k;
@@ -282,7 +292,7 @@ void insert_on_page(PointerS pointer, Register reg, PointerS right, long int* tr
 	}
 }
 
-// funcao que imprime o caminho percorrido ate encontrar a chave desejada
+// Função que imprime a árvore
 void print(PointerS* pointer, int key, long int* transfer, long int* compare){
 	int i = 0;
 	PointerS aux;
@@ -291,6 +301,7 @@ void print(PointerS* pointer, int key, long int* transfer, long int* compare){
 		return;
 	}
 
+	// Imprime primeiro as páginas internas e depois as externas
 	if ((*pointer)->st == INTERNAL) {
 		while (i <= (*pointer)->UU.UI.n_int){
 			print(&((*pointer)->UU.UI.p_int[i]), key, transfer, compare);

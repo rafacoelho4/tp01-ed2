@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
     int qtd = atoi(argv[2]);
     int situacao = atoi(argv[3]);
     int chave = atoi(argv[4]);
+
+    int* chaves = (int*) malloc(qtd * sizeof(int));
     
     bool parametro = false;
     if(argc > 5){
@@ -33,41 +35,113 @@ int main(int argc, char *argv[])
             return 0;
         } else if (situacao == 1) {
             criarArquivoCrescente(qtd);
-            sequencial_indexado(situacao, chave, qtd, parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                sequencial_indexado(situacao, chaves[i], qtd, parametro);
+                printf("\n");
+            }
+
+            //sequencial_indexado(situacao, chave, qtd, parametro);
         } else if (situacao == 2) {
             criarArquivoDecrescente(qtd);
-            sequencial_indexado(situacao, chave, qtd, parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                sequencial_indexado(situacao, chaves[i], qtd, parametro);
+                printf("\n");
+            }
+
+            //sequencial_indexado(situacao, chave, qtd, parametro);
         }
     }
     
     if (metodo == 2) {
         if(situacao == 1 ){
             criarArquivoCrescente(qtd);
-            binary_tree(chave,"crescente.bin",parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                binary_tree(chaves[i],"crescente.bin", parametro);
+                printf("\n");
+            }
+
+            //binary_tree(chave,"crescente.bin",parametro);
         }
         else if(situacao == 2 ){
             criarArquivoDecrescente(qtd);
-            binary_tree(chave,"decrescente.bin",parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                binary_tree(chaves[i],"decrescente.bin", parametro);
+                printf("\n");
+            }
+
+            //binary_tree(chave,"decrescente.bin",parametro);
         }
         else{
             criarArquivoAleatorio(qtd);
-            binary_tree(chave,"aleatorio.bin",parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                binary_tree(chaves[i],"aleatorio.bin", parametro);
+                printf("\n");
+            }
+
+            //binary_tree(chave,"aleatorio.bin",parametro);
         }
     }
 
      if (metodo == 3) {
         if(situacao == 1 ){
             criarArquivoCrescente(qtd);
-            b_tree(chave,"crescente.bin",parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                b_tree(chaves[i],"crescente.bin", parametro);
+                printf("\n");
+            }
+
+            //b_tree(chave,"crescente.bin",parametro);
         }
         else if(situacao == 2 ){
             criarArquivoDecrescente(qtd);
-             b_tree(chave,"decrescente.bin",parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                b_tree(chaves[i], "decrescente.bin", parametro);
+                printf("\n");
+            }
+
+            //b_tree(chave,"decrescente.bin",parametro);
             
         }
         else{
             criarArquivoAleatorio(qtd);
-             b_tree(chave,"aleatorio.bin",parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                b_tree(chaves[i],"aleatorio.bin", parametro);
+                printf("\n");
+            }
+
+            //b_tree(chave,"aleatorio.bin",parametro);
             
         }
     }
@@ -76,15 +150,42 @@ int main(int argc, char *argv[])
     
         if(situacao == 1 ){
             criarArquivoCrescente(qtd);
-            b_star(chave, "crescente.bin", qtd, parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                b_star(chaves[i], "crescente.bin", qtd, parametro);
+                printf("\n");
+            }
+
+            //b_star(chave, "crescente.bin", qtd, parametro);
         }
         else if(situacao == 2 ){
             criarArquivoDecrescente(qtd);
-             b_star(chave, "decrescente.bin", qtd, parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                b_star(chaves[i], "crescente.bin", qtd, parametro);
+                printf("\n");
+            }
+            
+            //b_star(chave, "decrescente.bin", qtd, parametro);
         }
         else{
             criarArquivoAleatorio(qtd);
-             b_star(chave, "aleatorio.bin", qtd, parametro);
+
+            // Teste automático com 10 chaves
+            chaves = criaChaves(qtd);
+            for(int i = 0; i < 10; i++){
+                printf("\n%d TESTE:\n", i+1);
+                b_star(chaves[i], "crescente.bin", qtd, parametro);
+                printf("\n");
+            }
+            
+            //b_star(chave, "aleatorio.bin", qtd, parametro);
         } 
     } 
 

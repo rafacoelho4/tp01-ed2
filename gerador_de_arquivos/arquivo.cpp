@@ -136,10 +136,10 @@ void criarArquivoAleatorio(int tamanho) {
     for(i = 1; i <= tamanho; i++) {
         item.dado1 = i * 20;
 
-       item.chave= rand()%tamanho;// Returns a pseudo-random integer between 0 and RAND_MAX.
-        printf("%i\n",item.chave);
+        item.chave= rand()%tamanho; // Returns a pseudo-random integer between 0 and RAND_MAX.
+        //printf("%i\n",item.chave);
         char str[501];
-        str[500] = '\1'; // make the last character non-zero so we can test based on it later
+        str[500] = '\1'; // Make the last character non-zero so we can test based on it later
         rand_str(str, sizeof str - 1);
 
         char cod[4];
@@ -152,4 +152,30 @@ void criarArquivoAleatorio(int tamanho) {
     }
 
     fclose(arq);
+}
+
+int* criaChaves(int qtd){
+    srand(time(NULL));
+    int* chaves = (int*) malloc (qtd * sizeof(int));
+
+    for (int i = 0; i < qtd; i++){
+        chaves[i] = i;  
+    }
+     
+    // "Shuffle" dos nºs no vetor, impedindo repetições
+    for (int i = 0; i < qtd; i++){
+        int r = i + (rand() % (qtd - i)); //int r = i + (rand() % (qtd - i)); 
+        int temp = chaves[i]; 
+        chaves[i] = chaves[r]; 
+        chaves[r] = temp;
+    }
+
+    // Impressão para teste
+    printf("CHAVES:\n");
+    for(int i = 0; i < 10; i++){
+        printf("%d ", chaves[i]);
+    }
+    printf("\n");
+
+    return chaves;
 }

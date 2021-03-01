@@ -20,8 +20,8 @@ void binary_tree( int key, const char* name, bool parametro ){
 }
 
 void search(int key, FILE* output_file, bool parametro){
-     long long transf=0;  
-     long long comp=0;
+    long long transf=0;  
+    long long comp=0;
     clock_t start = clock();
         if(search_node( key, &output_file, &transf, &comp,parametro)){
             cout<<"item encontrado"<<endl;
@@ -30,11 +30,13 @@ void search(int key, FILE* output_file, bool parametro){
             cout<<"item não encontrado"<<endl;
         }
          clock_t end = clock();
-        cout<<"Tempo busca:\n";
-        cout<<"Quantidade de comparações: "<<comp<<endl;
-        cout<<"Quantidade de transferencias: "<<(transf)<<endl;
+
+        printf("\nPESQUISA:");
+        printf(ANSI_COLOR_BLUE "\nCOMPARACOES             : %lld" ANSI_COLOR_RESET, comp);
+        printf(ANSI_COLOR_BLUE "\nTRANSFERENCIAS          : %lld" ANSI_COLOR_RESET, (transf));
         double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        cout<<"Tempo total: "<<cpu_time_used<<endl;     
+        printf(ANSI_COLOR_BLUE "\nTEMPO PREPROCESSAMENTO  : %lf segundos" ANSI_COLOR_RESET, cpu_time_used);
+        printf("\n");  
 }
 
 void insert(FILE* output_file, FILE* input_file,  long long*transf ,  long long*comp){
@@ -89,11 +91,13 @@ void insert(FILE* output_file, FILE* input_file,  long long*transf ,  long long*
         (*transf)++;    
     } 
     clock_t end = clock();
-    cout<<"Tempo inserção:\n";
-    cout<<"Quantidade de comparações: "<<(*comp)<<endl;
-    cout<<"Quantidade de transferencias: "<<(*transf)<<endl;
+
+    printf("\nINSERÇÃO:");
+    printf(ANSI_COLOR_BLUE "\nCOMPARACOES             : %lld" ANSI_COLOR_RESET, (*comp));
+    printf(ANSI_COLOR_BLUE "\nTRANSFERENCIAS          : %lld" ANSI_COLOR_RESET, (*transf));
     double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    cout<<"Tempo total: "<<cpu_time_used<<endl;        
+    printf(ANSI_COLOR_BLUE "\nTEMPO PREPROCESSAMENTO  : %lf segundos" ANSI_COLOR_RESET, cpu_time_used);
+    printf("\n");
 }
 
 Node create_node(Node a ){

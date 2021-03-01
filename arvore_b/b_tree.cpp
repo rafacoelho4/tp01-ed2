@@ -1,4 +1,8 @@
 #include "b_tree.hpp"
+
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 using namespace std;
 
 #define M 2
@@ -25,11 +29,13 @@ void b_tree(int key, const char* name, bool parametro){
             (transf)++;
         }
         clock_t end = clock();
-        cout<<"Tempo inserção:\n";
-        cout<<"Quantidade de comparações: "<<(comp)<<endl;
-        cout<<"Quantidade de transferencias: "<<transf<<endl;
+
+        printf("\nINSERÇÃO:");
+        printf(ANSI_COLOR_BLUE "\nCOMPARACOES             : %lld" ANSI_COLOR_RESET, (comp));
+        printf(ANSI_COLOR_BLUE "\nTRANSFERENCIAS          : %lld" ANSI_COLOR_RESET, transf);
         double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        cout<<"Tempo total: "<<cpu_time_used<<endl;   
+        printf(ANSI_COLOR_BLUE "\nTEMPO PREPROCESSAMENTO  : %lf segundos" ANSI_COLOR_RESET, cpu_time_used);
+        printf("\n"); 
        
         r.key = key;
         comp = 0;
@@ -42,11 +48,13 @@ void b_tree(int key, const char* name, bool parametro){
              cout<<"\nRegistro não foi encontrado!";
         } 
         end = clock();
-        cout<<"\nTempo busca: \n";
-        cout<<"Quantidade de comparações: "<<(comp)<<endl;
-        cout<<"Quantidade de transferencias: "<<transf<<endl;
+
+        printf("\n");
+        printf("\nPESQUISA:");
+        printf(ANSI_COLOR_BLUE "\nCOMPARACOES             : %lld" ANSI_COLOR_RESET, (comp));
+        printf(ANSI_COLOR_BLUE "\nTRANSFERENCIAS          : %lld" ANSI_COLOR_RESET, transf);
         cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        cout<<"Tempo total: "<<cpu_time_used<<endl;
+        printf(ANSI_COLOR_BLUE "\nTEMPO PREPROCESSAMENTO  : %lf segundos" ANSI_COLOR_RESET, cpu_time_used);
        
     } 
     fclose(input_file);          
