@@ -125,18 +125,26 @@ int pesquisa (int tab[], int tam, Item* item, FILE *arq, int *comparacoes, int *
 
     // Se não, i = ?
     else {
+        // Se eu nao tiver na última página, minha página está cheia com ITENSPAGINA itens
         if (i < tam) quantitens = ITENSPAGINA;
+        // Se eu tiver na última página, verifico se ela está cheia ou não
         else {
+            // Vou até o final do arquivo
             fseek (arq, 0, SEEK_END);
+            // Posição final do arquivo dividio pelo tamanho de itens = nro de registros totais 
+            // Nro de registros módulo de ITENSPAGINA = quantidade de itens na minha ultima pagina
             quantitens = (ftell(arq)/sizeof(Item))%ITENSPAGINA;
+            // Se for igual a 0, página esta cheia
             if(quantitens == 0) quantitens = ITENSPAGINA;
         }
 
         // Lê a página desejada do arquivo
-        // desloc = (tab[i-1].posicao-1)*ITENSPAGINA*sizeof(Item);
         desloc = (i-1)*ITENSPAGINA*sizeof(Item); 
 
+        // Vou até a pagina que contem meu item
         fseek (arq, desloc, SEEK_SET);
+
+        // Leio a pagina inteira
         fread (&pagina, sizeof(Item), quantitens, arq);
 
         // O fread é executado mais uma vez, então mais uma nova transferência
@@ -146,11 +154,10 @@ int pesquisa (int tab[], int tam, Item* item, FILE *arq, int *comparacoes, int *
         for (i=0; i < quantitens; i++) {
             *comparacoes = *comparacoes + 1;
             if(p){
-                    printf("Comparacao na pagina: %d\n", pagina[i].chave);
-                }
+                printf("Comparacao na pagina: %d\n", pagina[i].chave);
+            }
             if (pagina[i].chave == item->chave) {
                 *item = pagina[i];
-                // printf("Encontrado %d | %d", item->chave, item ->dado1);
 
                 // Clock é parado e o tempo de execução é retornado em double
                 end = clock();
@@ -213,7 +220,6 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
     int i = 0, quantitens;
     long desloc;
     *comparacoes = 0;
-    int nropag;
 
     // Inicializamos as variáveis de auxílio a captar o tempo de execução
     clock_t start, end;
@@ -236,8 +242,6 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
             *comparacoes = *comparacoes + 1;
         }
     }
-    
-    nropag = i;
 
     // Caso a chave desejada seja menor que a 1a chave, o item não existe no arquivo
     if (i == 0) return 0;
@@ -254,8 +258,6 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
         // Lê a página desejada do arquivo
         desloc = (i-1)*ITENSPAGINA*sizeof(Item);
 
-        // comecando nas ultimas 200 posicoes
-        // fseek(arq, - (200 * sizeof(Item)), SEEK_END);
         fseek (arq, desloc, SEEK_SET);
         fread (&pagina, sizeof(Item), quantitens, arq);
         *transferencias = *transferencias + 1;
@@ -263,14 +265,11 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
         // Pesquisa sequencial na página lida
         for (i = 0; i < quantitens; i++) {
             *comparacoes = *comparacoes + 1;
-            // printf("\n\nPAGINA DE POSICAO %d | Chave: %d", nropag + 1, pagina[i].chave);
             if(p){
                 printf("Comparacao na pagina: %d\n", pagina[i].chave);
             }
             if (pagina[i].chave == item->chave) {
-                
                 *item = pagina[i];
-                // printf("Encontrado %d | %d", item->chave, item ->dado1);
 
                 // Clock é parado e o tempo de execução é retornado em double
                 end = clock();
@@ -289,32 +288,3 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
         return 0;
     }
 }
-
-// Test de 10 chaves
-// int teste(FILE *arq) {
-//     int pos, qtd; int comparacoes = 0, transferencias = 0; double tempo;
-//     int resultados[10]; int chaves[10] = {1,2,3,400,500,6,7,8,9000,10}; 
-
-//     int i, j = 100, k;
-//     for(i = 0; i < 6; i++) {
-//         tipoindice tabela[MAXTABELA]; Item x;
-//         pos = preprocessamento(tabela, arq, j, &transferencias, &tempo);
-//         for(k = 0; k < 10; k++) {
-//             x.chave = chaves[k] + 4*i + k*2;
-//             printf("\nChave: %d", x.chave);
-//             resultados[k] = pesquisa(tabela, pos, &x, arq, &comparacoes, &transferencias, &tempo);
-
-//             if(resultados[k]) {
-//                 printf("\nRegistro encontrado!");
-//                 // printf("Item: %d | %ld, %s \n", x.chave, x.dado1, x.dado2);
-//             } else {
-//                 printf("\nRegistro nao foi encontrado :(");
-//             }
-//             rewind(arq);
-//         }
-//         printf(ANSI_COLOR_BLUE "\nCOMPARACOES EM ARQ DE %d REGISTROS       : %d" ANSI_COLOR_RESET, j, comparacoes);
-//         j = j * 10;
-//     }
-
-//     return 0;
-// }
