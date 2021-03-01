@@ -172,6 +172,7 @@ int pesquisa (int tab[], int tam, Item* item, FILE *arq, int *comparacoes, int *
 
 // Tabela ordenada decrescentemente
 int preprocessamentoDecrescente(int tabela[], FILE *arq, int quantidade, int *transferencias, double *tempo) {
+    // Uma página nada mais é que um conjunto de 4 items
     Item pag[ITENSPAGINA];
     int pos = 0, cont = 0;
 
@@ -180,18 +181,12 @@ int preprocessamentoDecrescente(int tabela[], FILE *arq, int quantidade, int *tr
     double cpu_time_used;
     start = clock();
 
-    // NAS ULTIMAS 200 POSICOES
-    // fseek(arq, - (200 * sizeof x), SEEK_END);
-
     // A leitura dos itens é feita de 4 em 4 (tamanho de nossa pagina)
     while ((fread(pag, ITENSPAGINA * sizeof(Item), 1, arq)) == 1) {
         cont++;
         if(cont > quantidade) break;
-        if (cont % ITENSPAGINA == 1) {
-            tabela[pos] = pag[0].chave;
-            // tabela[pos].posicao = pos + 1;
-            pos++;
-        }
+        tabela[pos] = pag[0].chave;
+        pos++;
     }
 
     // O número de leituras no arquivo de entrada é o nro de transferências entre memória secundária e principal
@@ -208,7 +203,6 @@ int preprocessamentoDecrescente(int tabela[], FILE *arq, int quantidade, int *tr
     //     printf("\n%2d | %-8d", i, tabela[i]);
     // }
     
-
     fflush (stdout);
     return pos;
 }
@@ -230,10 +224,11 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
     if(p) { 
         i = 0;
         while (i < tam && tab[i] >= item->chave) {
-            printf("\nComparação na tabela: %d", tab[i]);
+            printf("\nComparacao na tabela: %d", tab[i]);
             i++;
             *comparacoes = *comparacoes + 1;
         }
+        printf("\n\n");
     } else {
         i = 0;
         while (i < tam && tab[i] >= item->chave) {
@@ -242,7 +237,6 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
         }
     }
     
-
     nropag = i;
 
     // Caso a chave desejada seja menor que a 1a chave, o item não existe no arquivo
@@ -270,10 +264,11 @@ int pesquisaDecrescente (int tab[], int tam, Item* item, FILE *arq, int *compara
         for (i = 0; i < quantitens; i++) {
             *comparacoes = *comparacoes + 1;
             // printf("\n\nPAGINA DE POSICAO %d | Chave: %d", nropag + 1, pagina[i].chave);
+            if(p){
+                printf("Comparacao na pagina: %d\n", pagina[i].chave);
+            }
             if (pagina[i].chave == item->chave) {
-                if(p){
-                    printf("\nComparação na página: %d", pagina[i].chave);
-                }
+                
                 *item = pagina[i];
                 // printf("Encontrado %d | %d", item->chave, item ->dado1);
 
