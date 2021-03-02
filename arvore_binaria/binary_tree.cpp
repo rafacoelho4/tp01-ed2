@@ -147,7 +147,7 @@ int insert_left_node( Node node, Node aux, int count, int* position, FILE** file
         if(fread( &aux, sizeof(Node), 1, *file ) == 1){
             (*transf)++;
             if(parametro)
-                cout<<"\n"<<aux.reg.key;
+                cout<<"Registro: \n"<<aux.reg.key;
 
             if(key > aux.reg.key){
                 (*comp)++;
