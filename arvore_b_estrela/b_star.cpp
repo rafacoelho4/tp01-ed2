@@ -34,6 +34,7 @@ void b_star(int key, const char* file_name, int qtd, bool p) {
     printf("\n");
 
    reg.key = key; compare = 0; transfer = 0;
+  
    start = clock();
    if (p){
         print(&tree, key, &transfer, &compare);

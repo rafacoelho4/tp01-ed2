@@ -152,12 +152,10 @@ int main(int argc, char *argv[])
             criarArquivoCrescente(qtd);
 
             // Teste automático com 10 chaves
-            chaves = criaChaves(qtd);
-            for(int i = 0; i < 10; i++){
-                printf("\n%d TESTE:\n", i+1);
-                b_star(chaves[i], "crescente.bin", qtd, parametro);
-                printf("\n");
-            }
+           
+                b_star(chave, "crescente.bin", qtd, parametro);
+      
+    
 
             //b_star(chave, "crescente.bin", qtd, parametro);
         }
@@ -165,12 +163,10 @@ int main(int argc, char *argv[])
             criarArquivoDecrescente(qtd);
 
             // Teste automático com 10 chaves
-            chaves = criaChaves(qtd);
-            for(int i = 0; i < 10; i++){
-                printf("\n%d TESTE:\n", i+1);
-                b_star(chaves[i], "crescente.bin", qtd, parametro);
-                printf("\n");
-            }
+           
+                b_star(chave, "crescente.bin", qtd, parametro);
+          
+            
             
             //b_star(chave, "decrescente.bin", qtd, parametro);
         }

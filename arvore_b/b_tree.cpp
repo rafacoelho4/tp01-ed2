@@ -39,6 +39,7 @@ void b_tree(int key, const char* name, bool parametro){
        
         r.key = key;
         comp = 0;
+        transf = 0;
         start = clock();
         if(search(&r,tree,&comp )){
             if(parametro)
