@@ -7,4 +7,10 @@ typedef struct {
     char dado2[501];
 } Item;
 
+typedef struct{
+    int key;
+    long int data1;
+    char data2[501];
+}Register;
+
 #endif
